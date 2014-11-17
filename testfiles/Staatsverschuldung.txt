@@ -1,0 +1,27 @@
+BUND	GEO	debts	deficit
+EUR	Belgien	387158.90	2.6
+NEUR	Bulgarien	7532.90	1.5
+EUR	Tschechische Republik	65198.90	1.5
+EUR	Dänemark	110849.70	0.8
+EUR	Deutschland	2147027.80	0
+EUR	Estland	1844.80	0.2
+EUR	Irland	202919.80	7.2
+EUR	Spanien	960676.50	7.1
+EUR	Frankreich	1925291.90	4.3
+NEUR	Kroatien	28872.50	4.9
+EUR	Italien	2069215.90	3
+EUR	Lettland	8873.30	1
+NEUR	Litauen	13644.50	2.2
+EUR	Luxemburg	10511.60	0.1
+NEUR	Ungarn	77659.50	2.2
+NEUR	Malta	5243.10	2.8
+EUR	Niederlande	443008.00	2.5
+EUR	Österreich	233302.50	1.5
+NEUR	Polen	224468.50	4.3
+EUR	Portugal	213630.70	4.9
+NEUR	Rumänien	54002.50	2.3
+NEUR	Slowenien	25307.10	14.7
+NEUR	Slowakei	39975.20	2.8
+EUR	Finnland	110193.00	2.1
+EUR	Schweden	166459.30	1.1
+NEUR	Vereinigtes Königreich	1752398.90	5.8
