@@ -1,7 +1,7 @@
 "  treemap.vim: (plugin) Creates a treemap in a new tab
 "  Last Change: Thu Nov 17 6:31 PM 2014 MET
-"  Author:	Volker Wolf
-"  Maintainer:  Volker Wolf
+"  Author:	Data-Statiker
+"  Maintainer:  Data-Statiker
 "  Version:     0.7, for Vim 7.4+
 
 "  New:
