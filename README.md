@@ -19,26 +19,27 @@ xml	xmlcleaner.vim	16
 xml	readme.md	7
 
 #### Output 'VIM':
-+----------------------------------------------------------+  
-|+-----------------------++-------------------------------+|  
-||+-------------++------+||+--------------------++-------+||  
-|||treemap.vim  ||readme|tx|xmlcleaner.vim      ||readme.|d|  
-|||             ||      ||||                    ||       |||  
-|||             ||      ||||                    ||       |||  
-|||             ||      ||||                    ||       |||  
-|||             ||      ||||                    ||       |||  
-|||             ||      ||||                    ||       |||  
-|||             ||      ||||                    ||       |||  
-|||             ||      ||||                    ||       |||  
-|||             ||      ||||                    ||       |||  
-|||             ||      ||||                    ||       |||  
-|||             ||      ||||                    ||       |||  
-|||             ||      ||||                    ||       |||  
-|||             ||      ||||                    ||       |||  
-|||             ||      ||||                    ||       |||  
-||+-------------++------+||+--------------------++-------+||  
-|+-----------------------++-------------------------------+|  
-+----------------------------------------------------------+  
++----------------------------------------------------------+nbsp;nbsp;<br>
+|+-----------------------++-------------------------------+|nbsp;nbsp;<br>
+||+-------------++------+||+--------------------++-------+||nbsp;nbsp;<br>
+|||treemap.vimnbsp;nbsp;||readme|tx|xmlcleaner.vimnbsp;nbsp;nbsp;nbsp;nbsp;nbsp;||readme.|d|nbsp;nbsp;<br>
+|||nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;||nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;||||nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;||nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;|||nbsp;nbsp;<br>
+|||nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;||nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;||||nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;||nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;|||nbsp;nbsp;<br>
+|||nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;||nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;||||nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;||nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;|||nbsp;nbsp;<br>
+|||nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;||nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;||||nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;||nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;|||nbsp;nbsp;<br>
+|||nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;||nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;||||nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;||nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;|||nbsp;nbsp;<br>
+|||nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;||nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;||||nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;||nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;|||nbsp;nbsp;<br>
+|||nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;||nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;||||nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;||nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;|||nbsp;nbsp;<br>
+|||nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;||nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;||||nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;||nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;|||nbsp;nbsp;<br>
+|||nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;||nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;||||nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;||nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;|||nbsp;nbsp;<br>
+|||nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;||nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;||||nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;||nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;|||nbsp;nbsp;<br>
+|||nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;||nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;||||nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;||nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;|||nbsp;nbsp;<br>
+|||nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;||nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;||||nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;||nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;|||nbsp;nbsp;<br>
+|||nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;||nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;||||nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;||nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;nbsp;|||nbsp;nbsp;<br>
+||+-------------++------+||+--------------------++-------+||nbsp;nbsp;<br>
+|+-----------------------++-------------------------------+|nbsp;nbsp;<br>
++----------------------------------------------------------+nbsp;nbsp;<br>
+ 
 
 #### Output 'SVG':
 \<?xml version="1.0" encoding="ISO-8859-1"?\>
