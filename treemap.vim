@@ -1,5 +1,5 @@
 "  treemap.vim: (plugin) Creates a treemap in a new tab
-"  Last Change: Thu Nov 17 6:31 PM 2014 MET
+"  Last Change: Thu Nov 20 4:16 PM 2014 MET
 "  Author:	Data-Statiker
 "  Maintainer:  Data-Statiker
 "  Version:     0.7, for Vim 7.4+
@@ -12,6 +12,7 @@
 "  	VIM: Rectangles are created in a new tab with the signs "-", "|" and "+" 
 "  	SVG: Rectangles are descripted in a SVG structure imbedded in a html
 "  	file 
+"  *	New function treemap#initialize for initializing global variables
 "
 "  Version 0.6:
 "  *	Delete not used methods "treemap#reorgHierachy" and "treemap#reorgHierachy2" with
@@ -34,64 +35,67 @@
 " tabpagenr()
 " &tabpagemax
 
-" frame data
-":let g:x = 230
-":let g:y = 65
-:let g:x = 1024
-:let g:y = 768
-:let g:pt = g:x * g:y
+" initialize global variables
+:function! treemap#initialize()
+	" frame data
+	":let g:x = 230
+	":let g:y = 65
+	:let g:x = 1024
+	:let g:y = 768
+	:let g:pt = g:x * g:y
 
-" val2 average and interval values / is val2 active or not
-:let g:val2active = "false"
-:let g:val2Average = 0.00
-:let g:val2Interval = 20.00
+	" val2 average and interval values / is val2 active or not
+	:let g:val2active = "false"
+	:let g:val2Average = 0.00
+	:let g:val2Interval = 20.00
 
-" fill colors for Rectangles
-:let g:color = ['blue','grey','red']
-:let g:cIndex = 0
+	" fill colors for Rectangles
+	:let g:color = ['blue','grey','red']
+	:let g:cIndex = 0
 
-" number of layers
-:let g:lNr = 0
+	" number of layers
+	:let g:lNr = 0
 
-" actual tabpage
-:let g:tabMain = tabpagenr()
+	" actual tabpage
+	:let g:tabMain = tabpagenr()
 
-" list for warnings and errors
-:let g:mess = []
-:let g:err = 0
+	" list for warnings and errors
+	:let g:mess = []
+	:let g:err = 0
 
-" verbose - all messenges are displayed
-:let g:verb = 0
+	" verbose - all messenges are displayed
+	:let g:verb = 0
 
-" Hierachy flach
-:let g:trHier = []
+	" Hierachy flach
+	:let g:trHier = []
 
-" Definition of errors, informations and warnings
-" Errors
-:let g:E0001 = {"T":"E","O":"A","DE":"|E|E0001|Anzahl Ebenen nicht korrekt"}
-:let g:E0001["EN"] = "|E|E0001|Number of layers are incorrect"
-:let g:E0002 = {"T":"E","O":"A","DE":"|E|E0002|Das Programm musste aufgrund eines Fehlers abgebrochen werden"}
-:let g:E0002["EN"] = "|E|E0002|The program was interupted cause of errors"
-:let g:E0003 = {"T":"E","O":"A","DE":"|E|E0003|Der letzte Eintrag ist kein numerischer Wert"}
-:let g:E0003["EN"] = "|E|E0003|The last entry is no numeric value"
-:let g:E0004 = {"T":"E","O":"A","DE":"|E|E0004|Der Rahmen ist zu klein"}
-:let g:E0004["EN"] = "|E|E0004|Frame is too small"
-" Warnings
-:let g:W0001 = {"T":"W","O":"A","DE":"|W|W0001|Das Rechteck wird nicht gezeichnet, da Fläche zu gering"}
-:let g:W0001["EN"] = "|W|W0001|The rectangle is not drawn because the area is too low"
-" Informations
-:let g:I0001 = {"T":"I","O":"A","DE":"|I|I0001|Die Inputparameter sind korrekt"}
-:let g:I0001["EN"] = "|I|I0001|Input paramter are correct"
-:let g:I0002 = {"T":"I","O":"A","DE":"|I|I0002|Die Parameter wurden erfolgreich eingelesen"}
-:let g:I0002["EN"] = "|I|I0002|Parameter read successfull"
-:let g:I0003 = {"T":"I","O":"A","DE":"|I|I0003|Hierachie wurde aufgebaut und Summen ermittelt"}
-:let g:I0003["EN"] = "|I|I0003|Hierachy set up completed / calculating of sums completed"
-:let g:I0004 = {"T":"I","O":"A","DE":"|I|I0004|Proportionen wurden ermittelt und Hierachie angereichert"}
-:let g:I0004["EN"] = "|I|I0004|Proportion are calculated and hierachy are enriched"
-:let g:I0005 = {"T":"I","O":"A","DE":"|I|I0005|Rechteck wurde gezeichnet"}
-:let g:I0005["EN"] = "|I|I0005|Rectangle is drawn"
-:let g:I0006 = {"T":"I","O":"A","DE":"|I|I0006|Der Rahmen wurde gezeichnet"}
-:let g:I0006["EN"] = "|I|I0006|Frame is drawn"
+	" Definition of errors, informations and warnings
+	" Errors
+	:let g:E0001 = {"T":"E","O":"A","DE":"|E|E0001|Anzahl Ebenen nicht korrekt"}
+	:let g:E0001["EN"] = "|E|E0001|Number of layers are incorrect"
+	:let g:E0002 = {"T":"E","O":"A","DE":"|E|E0002|Das Programm musste aufgrund eines Fehlers abgebrochen werden"}
+	:let g:E0002["EN"] = "|E|E0002|The program was interupted cause of errors"
+	:let g:E0003 = {"T":"E","O":"A","DE":"|E|E0003|Der letzte Eintrag ist kein numerischer Wert"}
+	:let g:E0003["EN"] = "|E|E0003|The last entry is no numeric value"
+	:let g:E0004 = {"T":"E","O":"A","DE":"|E|E0004|Der Rahmen ist zu klein"}
+	:let g:E0004["EN"] = "|E|E0004|Frame is too small"
+	" Warnings
+	:let g:W0001 = {"T":"W","O":"A","DE":"|W|W0001|Das Rechteck wird nicht gezeichnet, da Fläche zu gering"}
+	:let g:W0001["EN"] = "|W|W0001|The rectangle is not drawn because the area is too low"
+	" Informations
+	:let g:I0001 = {"T":"I","O":"A","DE":"|I|I0001|Die Inputparameter sind korrekt"}
+	:let g:I0001["EN"] = "|I|I0001|Input paramter are correct"
+	:let g:I0002 = {"T":"I","O":"A","DE":"|I|I0002|Die Parameter wurden erfolgreich eingelesen"}
+	:let g:I0002["EN"] = "|I|I0002|Parameter read successfull"
+	:let g:I0003 = {"T":"I","O":"A","DE":"|I|I0003|Hierachie wurde aufgebaut und Summen ermittelt"}
+	:let g:I0003["EN"] = "|I|I0003|Hierachy set up completed / calculating of sums completed"
+	:let g:I0004 = {"T":"I","O":"A","DE":"|I|I0004|Proportionen wurden ermittelt und Hierachie angereichert"}
+	:let g:I0004["EN"] = "|I|I0004|Proportion are calculated and hierachy are enriched"
+	:let g:I0005 = {"T":"I","O":"A","DE":"|I|I0005|Rechteck wurde gezeichnet"}
+	:let g:I0005["EN"] = "|I|I0005|Rectangle is drawn"
+	:let g:I0006 = {"T":"I","O":"A","DE":"|I|I0006|Der Rahmen wurde gezeichnet"}
+	:let g:I0006["EN"] = "|I|I0006|Frame is drawn"
+:endf
 
 " go to a special tab(page)
 :function! treemap#gotoTab(nr)
@@ -796,6 +800,8 @@
 
 " main function to run the treemap algorithm
 :function! treemap#main(output)
+
+	:call treemap#initialize()
 	
 	:let g:cIndex = 0
 
