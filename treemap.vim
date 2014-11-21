@@ -1,5 +1,5 @@
 "  treemap.vim: (plugin) Creates a treemap in a new tab
-"  Last Change: Thu Nov 20 4:16 PM 2014 MET
+"  Last Change: Thu Nov 21 6:31 PM 2014 MET
 "  Author:	Data-Statiker
 "  Maintainer:  Data-Statiker
 "  Version:     0.7, for Vim 7.4+
@@ -7,12 +7,19 @@
 "  New:
 "  Version 0.7:
 "  *	In version 0.7 the output paramater is created for the function
-"  	treemap#main. The paramater output could have the values "VIM" or
+"  	treemap#main(). The paramater output could have the values "VIM" or
 "  	"SVG".
 "  	VIM: Rectangles are created in a new tab with the signs "-", "|" and "+" 
 "  	SVG: Rectangles are descripted in a SVG structure imbedded in a html
 "  	file 
 "  *	New function treemap#initialize for initializing global variables
+"  *	new parameter separator for the method treemap#main(). So the input
+"  	file could be separated by ";" or "\t" (tab) or any other signs. The values
+"  	of these parameter are for example:
+"  	;	for semicolon separated files
+"  	\t	for tabulator separated files
+"  	Examples: :call treemap#main('VIM',';')
+"  		  :call treemap#main('SVG','\t')
 "
 "  Version 0.6:
 "  *	Delete not used methods "treemap#reorgHierachy" and "treemap#reorgHierachy2" with
@@ -360,7 +367,7 @@
 
 " data are read out of the window and return the values as a double list
 " (matrix)
-:function! treemap#readScreen()
+:function! treemap#readScreen(separator)
 	
 	:let notes = []
 	:let err = 0
@@ -370,7 +377,7 @@
 	:let i = 0
 	:for i in range(0,len(buffer)-1)
 		
-		:call add(screen,split(buffer[i],"\t"))
+		:call add(screen,split(buffer[i],a:separator))
 
 	:endfor
 	:unlet i
@@ -799,8 +806,8 @@
 :endf
 
 " main function to run the treemap algorithm
-:function! treemap#main(output)
-
+:function! treemap#main(output,separator)
+	
 	:call treemap#initialize()
 	
 	:let g:cIndex = 0
@@ -819,7 +826,7 @@
 		:let g:pt = g:x * g:y
 	:endif
 	
-	:let screen = treemap#readScreen()
+	:let screen = treemap#readScreen(a:separator)
 	:let hier = treemap#createHierachy(screen)
 	:let nestedHier = treemap#reorgHierachy(hier)
 	:let recs = treemap#sliceAndDice(nestedHier)
