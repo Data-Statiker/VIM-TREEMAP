@@ -20,6 +20,8 @@
 "  	\t	for tabulator separated files
 "  	Examples: :call treemap#main('VIM',';')
 "  		  :call treemap#main('SVG','\t')
+"  *	insert 'throw "oops"' in treemap#interruptRun() so the program stops
+"	in case of error	
 "
 "  Version 0.6:
 "  *	Delete not used methods "treemap#reorgHierachy" and "treemap#reorgHierachy2" with
@@ -511,6 +513,7 @@
 		:call treemap#printMessage(notes)
 		:let g:err = 1
 		:sleep 10
+		:throw "oops"
 		":exit
 	:endif
 
