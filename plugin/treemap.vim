@@ -13,15 +13,17 @@
 "  	SVG: Rectangles are descripted in a SVG structure imbedded in a html
 "  	file 
 "  *	New function treemap#initialize for initializing global variables
-"  *	new parameter separator for the method treemap#main(). So the input
+"  *	New parameter separator for the method treemap#main(). So the input
 "  	file could be separated by ";" or "\t" (tab) or any other signs. The values
 "  	of these parameter are for example:
 "  	;	for semicolon separated files
 "  	\t	for tabulator separated files
 "  	Examples: :call treemap#main('VIM',';')
 "  		  :call treemap#main('SVG','\t')
-"  *	insert 'throw "oops"' in treemap#interruptRun() so the program stops
+"  *	Insert 'throw "oops"' in treemap#interruptRun() so the program stops
 "	in case of error	
+"  *	Create the menu "Plugin - Treemap" tor run the script and set the
+"	variables g:separator, g:output, g:color
 "
 "  Version 0.6:
 "  *	Delete not used methods "treemap#reorgHierachy" and "treemap#reorgHierachy2" with
@@ -44,6 +46,15 @@
 " tabpagenr()
 " &tabpagemax
 
+" fill colors for Rectangles
+:let g:color = ['blue','grey','red']
+
+" initialize g:separator
+:let g:separator = "\\t"
+
+" initialize g:output
+:let g:output = 'VIM'
+
 " initialize global variables
 :function! treemap#initialize()
 	" frame data
@@ -58,8 +69,7 @@
 	:let g:val2Average = 0.00
 	:let g:val2Interval = 20.00
 
-	" fill colors for Rectangles
-	:let g:color = ['blue','grey','red']
+	" fill colors for Rectangles color index
 	:let g:cIndex = 0
 
 	" number of layers

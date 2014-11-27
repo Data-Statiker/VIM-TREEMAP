@@ -1,0 +1,83 @@
+" vim: filetype=help foldmethod=marker foldmarker=<<<,>>> modifiable noreadonly
+*treemap.txt*	For Vim version 7.0.  Last change: 2013 Sep 24
+
+
+                	  VIM REFERENCE MANUAL 
+                                by 
+                           Data Statiker
+
+	  	Treemap extension plugin (treemap.vim) manual
+	  	treemap.vim version 0.7
+
+For instructions on installing this file, type
+	:help add-local-help
+|add-local-help| inside Vim.
+
+Homepage: https://github.com/Data-Statiker/VIM-TREEMAP
+
+*treemap* *treemap.vim* *tree_map* *tree_map.vim*
+
+1.  Getting Started			      |treemap-getting-started|
+2.  Whats New   			      |treemap-new|
+3.  Overview				      |treemap-overview|
+4.  Installation                              |treemap-install|
+5.  Configuration		              |treemap-configure|
+    5.1 Output File                           |treemap-configure-output|
+    5.2 Separator                             |treemap-configure-separator|
+    5.3 Colors                                |treemap-configure-color|
+6.  Menu                                      |treemap-menu|
+
+{Vi does not have any of this}
+
+==============================================================================
+1. Getting Started					*treemap-getting-started*
+
+With the treemap extension plugin for vim you can create treemaps with the
+output in a textfile or an imbedded SVG HTML file.
+
+To start the treemap creation:
+- load the inputfile
+- set the separator (;|,|\t|...) in the menu Plugin->Treemap->Separator
+- set the output type 'VIM' or 'SVG' in the menu Plugin->Treemap->Output Type
+- Run the treemap script in the menu Plugin->Treemap->Run    OR
+  call the main function: call treemap#main(output,separator)
+  for example: call treemap('VIM','\t')
+
+==============================================================================
+2.  Whats New						*treemap-new*
+
+Version 0.7:
+*	In version 0.7 the output paramater is created for the function
+	treemap#main(). The paramater output could have the values "VIM" or
+	"SVG".
+	VIM: Rectangles are created in a new tab with the signs "-", "|" and "+" 
+	SVG: Rectangles are descripted in a SVG structure imbedded in a html
+	file 
+*	New function treemap#initialize for initializing global variables
+*	New parameter separator for the method treemap#main(). So the input
+	file could be separated by ";" or "\t" (tab) or any other signs. The values
+	of these parameter are for example:
+	;	for semicolon separated files
+	\t	for tabulator separated files
+	Examples: :call treemap#main('VIM',';')
+		  :call treemap#main('SVG','\t')
+*	Insert 'throw "oops"' in treemap#interruptRun() so the program stops
+     in case of error	
+*	Create the menu "Plugin - Treemap" tor run the script and set the
+     variables g:separator, g:output, g:color
+
+Version 0.6:
+*	Delete not used methods "treemap#reorgHierachy" and "treemap#reorgHierachy2" with
+	all sub methods
+*	Rename method "treemap#reorgHierachy3" to "treemap#reorgHierachy"
+*	Add a second value column. This value is represented in the treemap through
+	colors (Heat Map). Only SVG-Output. If ther is no val 2 column, the layer 1
+	entries define the color of their childs
+
+Version 0.5:
+*	In version 0.5 the rekursive method "treemap#reorgHierachy2" is substitute
+	through the iterative method "treemap#reorgHierachy3"
+*	SVG-Output with fill color
+
+==============================================================================
+vim:tw=78:fo=tcq2:ts=8:ft=help:norl:

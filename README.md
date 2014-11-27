@@ -3,6 +3,14 @@
 VIM-TREEMAP is a vim script to create a treemap from a character seperated input file. The output could be a text file or a html file with imbedded SVG.
 
 ### How to use
+Copy the folders 'autoload', 'doc' and 'plugin' to your local vimfiles:<br>
+~/.vim/doc<br>
+OR (Windows)<br>
+C:\Users\YourUsername\vimfiles\doc<br>
+<br>
+Then you can use the menu 'Plugin -> Treemap'<br>
+<br>
+When you want only test the script, do the following:
 * open the input file in vim
 * load the script in commandLine with ':so PFAD/treemap.vim' (example - :so C:\treemap\treemap.vim)
 * run the method treemap#main(output,separator) in commandLine with ":call treemap#main('VIM',';')" or "treemap#main('SVG','\t')"
@@ -83,9 +91,27 @@ More details to the second case:
 * the value in the second value column is \< 20% of the avarage of the second value column, the color of the rectangle is blue
 * the value in the second value column is \>= 20% or \<= 20% of the avarage of the second value column, the color of the rectangle is grey
 * the value in the second value column is \> 20% of the avarage of the second value column, the color of the rectangle is red
-
+<br>
 You can change the colors in the global array 'g:color':<br>
 :let g:color = ['blue','grey','red']<br>
+OR in the Menu "Plugin -> Treemap -> Color"<br>
 <br>
 You can change the percentage of the borders in the global variable 'g:val2Interval:<br>
 :let g:val2Interval = 20.00<br>
+<br>
+### Menu
+The autoload treemap.vim file creates the menu 'Plugin -> Treemap' with the following submenus<br>
+Separator<br>
+- Choose the separator of the input file<br>
+Output Type<br>
+- Choose the output type 'VIM' or 'SVG'<br>
+Color<br>
+- Choose the colors for coloring
+<br>
+### Help VIM
+Start building a VIM helpfile. To activate the helpfile in VIM type in command line:<br>
+:helptags ~/.vim/doc<br>
+OR (Windows)<br>
+:helptags C:\Users\YourUsername\vimfiles\doc<br>
+<br>
+Then you can open the helpfile with ':help treemap'<br>
