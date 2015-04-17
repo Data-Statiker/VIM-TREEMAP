@@ -1,5 +1,5 @@
-" vim: filetype=help foldmethod=marker foldmarker=<<<,>>> modifiable noreadonly
-*treemap.txt*	For Vim version 7.0.  Last change: 2013 Sep 24
+" vim: filetype=help foldmethod=marker foldmarker=<<<,>>> nomodifiable readonly
+*treemap.txt*	For Vim version 7.4.  Last change: 2015 Apr 17
 
 
                 	  VIM REFERENCE MANUAL 
@@ -7,7 +7,7 @@
                            Data Statiker
 
 	  	Treemap extension plugin (treemap.vim) manual
-	  	treemap.vim version 0.7
+	  	treemap.vim version 0.8
 
 For instructions on installing this file, type
 	:help add-local-help
@@ -22,10 +22,15 @@ Homepage: https://github.com/Data-Statiker/VIM-TREEMAP
 3.  Overview				      |treemap-overview|
 4.  Installation                              |treemap-install|
 5.  Configuration		              |treemap-configure|
-    5.1 Output File                           |treemap-configure-output|
+    5.1 Output Type                           |treemap-configure-output|
     5.2 Separator                             |treemap-configure-separator|
     5.3 Colors                                |treemap-configure-color|
+    5.4 Size                                  |treemap-configure-size|
+    5.5 Other                                 |treemap-configure-other|
 6.  Menu                                      |treemap-menu|
+7.  Example                                   |treemap-example|
+8.  Colorization                              |treemap-colorization|
+9.  Message Handling                          |treemap-message|
 
 {Vi does not have any of this}
 
@@ -35,6 +40,8 @@ Homepage: https://github.com/Data-Statiker/VIM-TREEMAP
 With the treemap extension plugin for vim you can create treemaps with the
 output in a textfile or an imbedded SVG HTML file.
 
+First install the plugin: |treemap-install|
+
 To start the treemap creation:
 - load the inputfile
 - set the separator (;|,|\t|...) in the menu Plugin->Treemap->Separator
@@ -43,8 +50,25 @@ To start the treemap creation:
   call the main function: call treemap#main(output,separator)
   for example: call treemap('VIM','\t')
 
+Warning: The decimal separator for the input file is in every language the point "."
+         examples:   23.1
+                   1020.23
+
 ==============================================================================
 2.  Whats New						*treemap-new*
+
+Version 0.8:
+*	Introduce the global variables g:ux and g:uy to set the size from the
+	treemap. So the size of the treemap could be changed throug the variables:
+	g:ux = width
+	g:uy = height
+*	Adapt the menu to set the height and width of the treemap
+*	Adapt the menu for printing the log variable g:mess
+*	Update VIM help file treemap.txt
+*	For some parameters in the function treemap#initialize()
+  	Only set the variables when they do not exist
+*	New function treemap#checkChildParentRelation(matrix,val2Active)
+  	Check if every unit has only one parent
 
 Version 0.7:
 *	In version 0.7 the output paramater is created for the function
@@ -62,22 +86,496 @@ Version 0.7:
 	Examples: :call treemap#main('VIM',';')
 		  :call treemap#main('SVG','\t')
 *	Insert 'throw "oops"' in treemap#interruptRun() so the program stops
-     in case of error	
+        in case of error	
 *	Create the menu "Plugin - Treemap" tor run the script and set the
-     variables g:separator, g:output, g:color
+        variables g:separator, g:output, g:color
 
 Version 0.6:
-*	Delete not used methods "treemap#reorgHierachy" and "treemap#reorgHierachy2" with
-	all sub methods
-*	Rename method "treemap#reorgHierachy3" to "treemap#reorgHierachy"
+*	Delete not used functions "treemap#reorgHierachy" and "treemap#reorgHierachy2" with
+	all sub functions
+*	Rename function "treemap#reorgHierachy3" to "treemap#reorgHierachy"
 *	Add a second value column. This value is represented in the treemap through
-	colors (Heat Map). Only SVG-Output. If ther is no val 2 column, the layer 1
-	entries define the color of their childs
-
+  	colors (Heat Map). Only SVG-Output. If ther is no val 2 column, the layer 1
+  	entries define the color of their childs
+  
 Version 0.5:
-*	In version 0.5 the rekursive method "treemap#reorgHierachy2" is substitute
-	through the iterative method "treemap#reorgHierachy3"
+*	In version 0.5 the recursive function "treemap#reorgHierachy2" is substitute
+ 	through the iterative function "treemap#reorgHierachy3"
 *	SVG-Output with fill color
+
+==============================================================================
+3. Overview					*treemap-overview*
+
+With the treemap extension plugin for vim you can create treemaps with the
+output in a textfile or an imbedded SVG HTML file.
+
+To create a treemap you need an input file. This file has to be character
+seperated (CSV) and needs a headline.
+
+Example for an input file:
+folder;file;size
+treemap;treemap.vim;12
+treemap;readme.txt;6
+xml;xmlcleaner.vim;16
+xml;readme.md;7
+
+To create a treemap do the following:
+1 Open this input file in VIM
+  vim inputfile.txt
+2 Select the correct separator
+  Menu: Plugin->Treemap->Separator
+  In the example case use the separator "Semicolon ;"
+3 Select your favourite output type
+  Menu: Plugin->Treemap->Output Type
+  see |treemap-configure-output| and |treemap-menu|
+  The standard Output is "VIM <Textfile>"
+4 Start the treemap generation
+  Menu: Plugin->Treemap->Run main()
+
+Then a new tab opens. In case of the output type SVG you get the SVG/HTML Code
+in the new tab and in the other case (VIM) the treemap is drawn in the new tab
+with the signs "|","+" and "-".
+
+Instead of use the menu you can set the paramters and start the generation
+directly:
+- Separator
+  variable: g:separator                      // example: :let g:separator = ";"
+- Output Type
+  variable: g:output                         // example: :let g:output = "VIM"
+- Run the generation
+  function treemap#main(output,separator)    // example: :call treemap#main("VIM",";")
+
+Other paramters:
+You can change the size of the treemap with the following variables:
+- g:ux - width                                // example: :let g:x = 230
+- g:uy - height                               // example: :let g:y = 65
+To do that you can use the menu "Plugin"->"Treemap"->"Size".
+
+If this parameters aren't set, the default values are taken:
+VIM:  230 * 65
+SVG: 1024 * 768
+
+Warning: The decimal separator for the input file is in every language the point "."
+         examples:   23.1
+                   1020.23
+
+==============================================================================
+4. Installation					*treemap-install*
+
+VIMBALL:
+*********
+Download the vimball file treemap.vmb from:
+http://www.vim.org/scripts/script.php?script_id=5157
+
+Install the vimball file with VIM 
+1 Download the file treemap.vmb
+2 vim path/treemap.vmb
+3 :so %
+4 :q
+
+Now you have the menu Plugin->Treemap
+
+HELP FILE:
+***********
+To activate the helpfile in VIM type in command mode:
+ :helptags ~/.vim/doc
+ OR (Windows)
+ :helptags C:\Users\YourUsername\vimfiles\doc
+
+Then you can open the helpfile with ':help treemap'
+
+GITHUB:
+*********
+GITHUB Repository:
+https://github.com/Data-Statiker/VIM-TREEMAP
+
+When you have the files from GITHUB:
+Copy the folders 'autoload', 'doc' and 'plugin' to your local vimfiles:
+ ~/.vim/doc
+ OR (Windows)
+ C:\Users\YourUsername\vimfiles\doc
+
+==============================================================================
+5. Configuration				*treemap-configure*
+
+    5.1 Output Type                           *treemap-configure-output*
+	global variable: g:output
+		Default value: "VIM"
+		Defines the output type of the treemap
+		- VIM <textfile>: the treemap is drawn in a new tabulator
+		  with the signs "|", "-" and "+"
+		- SVG <SVG/HTML>: the HTML/SVG code of the treemap is 
+		  printed in a new tabulator. Save this file and open it
+		  in a browser.
+		You can choose the output type in the menu: |treemap-menu|
+		Or set the variable directly:
+		:let g:output = "VIM"
+		:let g:output = "SVG"
+-----------------------------------------------------------------------------
+    5.2 Separator                             *treemap-configure-separator*
+	global variable: g:separator
+		Default value: "\t"
+		Defines the character of the separator the input file is 
+		separated with:
+		The following character can be choosen in the menu:
+			Semicolon    ;
+			Tabulator    \t
+                        Vertical Bar |
+			Comma        ,
+			Slash        /
+			Backslash    \
+		You can choose any other character by setting the variable
+		directly.
+		example: let g:separator = "#"
+-----------------------------------------------------------------------------
+    5.3 Colors                                *treemap-configure-color*
+	global variable: g:color
+		A list with three values. The values are colors.
+		You can choice all possible colors.
+		example: let g:color = ["blue","grey","yellow"]
+
+	global variable: g:val2Interval
+		Default value: 20.00
+		The interval in percent (%) for colorization if there is
+		a second numeric value column. See also |treemap-colorization|.
+		The colors are different in the domains:
+		* < "g:val2Average - (g:val2Average * g:val2Interval / 100)"
+		* >= "g:val2Average - (g:val2Average * g:val2Interval / 100)"
+		  && <= "g:val2Average + (g:val2Average * g:val2Interval / 100)"
+		* > "g:val2Average + (g:val2Average * g:val2Interval / 100)"
+
+		The interval could only changed by setting the variable
+		directly: let g:val2Interval = 30.00
+
+		Warning: By changing the variable g:val2Interval please always
+                         specify the value with two decimals.
+		
+	global variable: g:val2Average
+		During the generation of the treemap the average of the
+		second numeric value column (if exists) is saved in this
+		variable.
+-----------------------------------------------------------------------------
+    5.4 Size                                  *treemap-configure-size*
+	global variable: g:ux & g:uy
+		Defines the size of the treemap.
+		g:ux -> width / g:uy -> height
+		In case of output type "VIM":
+		 Width:  the number of colums used in the textfile
+		 Height: the number of rows used in the textfile
+		In case of output type "SVG":
+		 Width:  the number of pixels in the SVG graphic
+		 Height: the number of pixels in the SVG graphic
+		Default values:
+		VIM:  230 * 65
+		SVG: 1024 * 768
+-----------------------------------------------------------------------------
+    5.5 Other                                 *treemap-configure-other*
+	global variable: g:verb
+		if "g:verb == 0" only error messages are displayed
+		if "g:verb == 1" all messages are displayed (includes warnings
+				 and informations
+		You can only set this parameter by setting the variabel
+		directly: :let g:verb = 1 --> default value = 0
+
+	global variable: g:mess
+		All messages (errors, warnings, informations) of a treemap
+		generation are saved in the this list
+
+		You can run the function treemap#printAllMessages(messages,lang)
+		to print all messages in a new tab. The new tab is generated
+		throgh the function.
+
+		parameter:
+		mess: list of messages (g:mess)
+		lang: language
+		
+		example:
+		:call treemap#printAllMessages(g:mess,"EN")
+
+==============================================================================
+6.  Menu                                      *treemap-menu*
+
+Plugin->Treemap->Run main()
+Start the treemap generation and call the function
+treemap#main(output,separator)
+with the variables g:output and g:separator
+
+-----------------------------------------------------------------------------
+
+Plugin->Treemap->Log g:mess
+Create a log file.
+Print the messages of the variable g:mess in a new tab.
+
+-----------------------------------------------------------------------------
+
+Plugin->Treemap->Color
+Defines the colors for the rectangles in the SVG output type mode. You have
+a choice between triples of colors
+
+-----------------------------------------------------------------------------
+
+Plugin->Treemap->Output Type
+Defines the output type of the treemap
+- VIM <textfile>: the treemap is drawn in a new tabulator with the signs "|",
+  "-" and "+"
+- SVG <SVG/HTML>: the HTML/SVG code of the treemap is printed in a new
+  tabulator. Save this file and open it in a browser.
+
+-----------------------------------------------------------------------------
+
+Plugin->Treemap->Separator
+Defines the character of the separator the input file is separated with
+Semicolon     ;
+Tabulator     \t
+Vertical Bar  |
+Comma         ,
+Slash         /
+Backslash     \
+
+-----------------------------------------------------------------------------
+
+Plugin->Treemap->Size
+Defines the size of the treemap. The width and the height.
+In case of output type "VIM":
+ Width:  the number of colums used in the textfile
+ Height: the number of rows used in the textfile
+In case of output type "SVG":
+ Width:  the number of pixels in the SVG graphic
+ Height: the number of pixels in the SVG graphic
+
+==============================================================================
+7.  Example                                   *treemap-example*
+
+Example for an input file:
+
+folder;file;size
+treemap;treemap.vim;12
+treemap;readme.txt;6
+xml;xmlcleaner.vim;16
+xml;readme.md;7
+
+
+Example of an output type "VIM":
+
++--------------------------------------------------------------------+  
+/+----------------------------++------------------------------------+|  
+//+-----------------++-------+//+-----------------------++---------+||  
+|||treemap.vim      /|readme./xt/xmlcleaner.vim         //readme.md|||  
+|||                 ||       ||||                       ||         |||  
+|||                 ||       ||||                       ||         |||  
+|||                 ||       ||||                       ||         |||  
+|||                 ||       ||||                       ||         |||  
+|||                 ||       ||||                       ||         |||  
+|||                 ||       ||||                       ||         |||  
+|||                 ||       ||||                       ||         |||  
+|||                 ||       ||||                       ||         |||  
+|||                 ||       ||||                       ||         |||  
+|||                 ||       ||||                       ||         |||  
+|||                 ||       ||||                       ||         |||  
+|||                 ||       ||||                       ||         |||  
+|||                 ||       ||||                       ||         |||  
+//+-----------------++-------+//+-----------------------++---------+||  
+/+----------------------------++------------------------------------+|  
++--------------------------------------------------------------------+  
+
+
+Example of an output type "SVG":
+
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="de">
+<head>
+<title>Treemap</title>
+</head>
+<body>
+<h1>Treemap</h1>
+<svg width="70" height="20" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<title>Treemap</title>
+<desc>generierte Treemap</desc>
+<rect x="2" y="2" width="30" height="18" fill="blue" stroke="black" />
+<text x="12" y="22" fill="black">treemap</text>
+<rect x="32" y="2" width="38" height="18" fill="grey" stroke="black" />
+<text x="42" y="22" fill="black">xml</text>
+<rect x="3" y="3" width="19" height="16" fill="blue" stroke="black" />
+<text x="13" y="23" fill="black">treemap.vim</text>
+<rect x="22" y="3" width="9" height="16" fill="blue" stroke="black" />
+<text x="32" y="23" fill="black">readme.txt</text>
+<rect x="33" y="3" width="25" height="16" fill="grey" stroke="black" />
+<text x="43" y="23" fill="black">xmlcleaner.vim</text>
+<rect x="58" y="3" width="11" height="16" fill="grey" stroke="black" />
+<text x="68" y="23" fill="black">readme.md</text>
+</svg>
+</body>
+</html>
+
+==============================================================================
+8.  Colorization                                   *treemap-colorization*
+
+Only in the output type "SVG" rectangles get a color:
+	* If there is only one column with values,
+	  the first column fixes the color of all child rectangles
+	* If there is a second column with values,
+	  the second value fixes the color of the rectangle (Heat Map)
+
+More details to the second case (default values):
+* the value in the second value column is < 20% of the avarage of the
+    second value column, the color of the rectangle is blue
+* the value in the second value column is >= 20% or <= 20% of the avarage
+    of the second value column, the color of the rectangle is grey
+* the value in the second value column is > 20% of the avarage of the second
+    value column, the color of the rectangle is red 
+
+You can change the colors in the global array 'g:color':
+  :let g:color = ['blue','grey','red']
+OR in the Menu "Plugin -> Treemap -> Color" (|treemap-menu|)
+
+You can change the percentage of the borders in the global variable 'g:val2Interval:
+  :let g:val2Interval = 20.00
+
+!! Please always specify the value with two decimals !!
+
+See also |treemap-configure-color|.
+
+==============================================================================
+9. Message Handling					*treemap-message*
+
+Definition of errors, informations and warnings
+
+Errors:
+								*E0001*
+	E0001 DE "Anzahl Ebenen nicht korrekt" 
+              EN "Number of layers are incorrect"
+
+	      Def: At least one row has not enough columns.
+	           Check your input file.
+
+	      Example of a wrong input file:
+
+	      folder ;file       ;size        | line 1
+	      Treemap;treemap.vim;7           | line 2
+	      Treemap;treemap.txt;6           | line 3
+	      XML    ;xmltest.xml             | line 4
+	      XML    ;xmltest.txt;7           | line 5
+
+	      In this case line 4 is one column too short.
+
+								*E0002*
+	E0002 DE "Das Programm musste aufgrund eines Fehlers abgebrochen werden"
+              EN "The program was interupted cause of errors"
+
+	      Def: There was an error. Because of this error the
+	           program must be stopped.
+                   Check the global variable g:mess. See also
+                                                     |treemap-configure-other|
+						     |treemap-menu|
+
+								*E0003*
+	E0003 DE "Der letzte Eintrag ist kein numerischer Wert"
+	      EN "The last entry is no numeric value"
+	      
+	      Def: The last entry in every row (without the headline)
+                   must be a numeric value.
+                   Check your numeric values.
+
+	      Hint: the decimal separator is "." in every language
+
+	      Example of a wrong input file:
+
+	      folder ;file       ;size        | line 1
+	      Treemap;treemap.vim;7           | line 2
+	      Treemap;treemap.txt;6           | line 3
+	      XML    ;xmltest.xml;testval     | line 4
+	      XML    ;treemap.txt;7,2         | line 5
+
+	      In this case line 4 and 5 have not a numeric value.
+	      Line 4: testval is not a numeric value
+	      Line 5: 7,2 is not a numeric value (decimal separator: ".")
+
+								*E0004*
+	E0004 DE "Der Rahmen ist zu klein"
+	      EN "Frame is too small"
+	      
+	      Def: The size of the treemap is too small.
+                   Check the height and width. See |treemap-configure-size|
+
+								*E0005*
+	E0005 DE "Jede Einheit darf nur einer übergeordneten Einheit zugeordnet sein"
+              EN "Every unit must have only one parent"
+	      
+              Def: Every unit in the input file must have only one parent.
+                   Check your input file.
+
+	      Example of a wrong input file:
+
+	      folder ;file       ;size        | line 1
+	      Treemap;treemap.vim;7           | line 2
+	      Treemap;treemap.txt;6           | line 3
+	      XML    ;xmltest.xml;4           | line 4
+	      XML    ;treemap.txt;7           | line 5
+
+	      In this case treemap.txt has two parents. See line 3 and 5.
+	      In line 3 the parent of treemap.txt is Treemap.
+	      In line 5 the parent of treemap.txt is XML.
+
+Warnings:
+								*W0001*
+	W0001 DE "Das Rechteck wird nicht gezeichnet, da Fläche zu gering"
+	      EN "The rectangle is not drawn because the area is too small"
+
+	      Def: Is the value of an unit is too small, so that the size of
+                   the relevant rectangle is smaller than 3*3 (hight*width)
+	           the rectangle is not drawn.
+	           This has no influence to the other rectangles
+
+Informations:
+								*I0001*
+	I0001 DE "Die Inputparameter sind korrekt"
+	      EN "Input paramter are correct"
+
+	      Def: All checks of the input parameters are correct.
+
+								*I0002*
+	I0002 DE "Die Parameter wurden erfolgreich eingelesen"
+	      EN "Parameter read successfull"
+
+	      Def: The input parameters of the input file are now ready for
+	           processing.
+
+								*I0003*
+	I0003 DE "Hierachie wurde aufgebaut und Summen ermittelt"
+	      EN "Hierachy set up completed / calculating of sums completed"
+
+	      Def: The hierachy of units are build for further processing.
+	           The entries in the input file are summarised.
+
+								*I0004*
+	I0004 DE "Proportionen wurden ermittelt und Hierachie angereichert"
+	      EN "Proportion are calculated and hierachy are enriched"
+
+	      Def: The proportion of the rectangles is calculated.
+
+								*I0005*
+	I0005 DE "Rechteck wurde gezeichnet"
+	      EN "Rectangle is drawn"
+
+	      Def: One rectangle is drawn.
+
+								*I0006*
+	I0006 DE "Der Rahmen wurde gezeichnet"
+	      EN "Frame is drawn"
+
+	      Def: The Frame Rectangle of the treemap is drawn.
+
+								*I0007*
+	I0007 DE "Jede Einheit bezieht sich auf eine übergerordnete Einheit"
+	      EN "Every unit has only one parent"
+
+	      Def: Every unit has only one parent. The error |E0005| did not
+                   occur.
+
+Alle messages of a treemap generation run are savesd in the global variable
+g:mess. You can create a log file. To do that read:
+|treemap-configure-other|
+|treemap-menu| - Plugin->Treemap->Log g:mess
 
 ==============================================================================
 vim:tw=78:fo=tcq2:ts=8:ft=help:norl:

@@ -1,10 +1,23 @@
 "  treemap.vim: (plugin) Creates a treemap in a new tab
-"  Last Change: Thu Nov 21 6:31 PM 2014 MET
+"  Last Change: Fri Apr 17 6:49 PM 2015 MET
 "  Author:	Data-Statiker
 "  Maintainer:  Data-Statiker
-"  Version:     0.7, for Vim 7.4+
+"  Version:     0.8, for Vim 7.4+
 
 "  New:
+"  Version 0.8:
+"  *	Introduce the global variables g:ux and g:uy to set the size from the
+"	treemap. So the size of the treemap could be changed throug the variables:
+"	g:ux = width
+"	g:uy = height
+"  *	Adapt the menu to set the height and width of the treemap
+"  *	Adapt the menu for printing the log variable g:mess
+"  *	Update VIM help file
+"  *	For some parameters in the function treemap#initialize()
+"  	Only set the variables when they do not exist
+"  *	New function treemap#checkChildParentRelation(matrix,val2Active)
+"  	Check if every unit has only one parent
+"
 "  Version 0.7:
 "  *	In version 0.7 the output paramater is created for the function
 "  	treemap#main(). The paramater output could have the values "VIM" or
@@ -26,25 +39,21 @@
 "	variables g:separator, g:output, g:color
 "
 "  Version 0.6:
-"  *	Delete not used methods "treemap#reorgHierachy" and "treemap#reorgHierachy2" with
-"  	all sub methods
-"  *	Rename method "treemap#reorgHierachy3" to "treemap#reorgHierachy"
+"  *	Delete not used functions "treemap#reorgHierachy" and "treemap#reorgHierachy2" with
+"  	all sub functions
+"  *	Rename function "treemap#reorgHierachy3" to "treemap#reorgHierachy"
 "  *	Add a second value column. This value is represented in the treemap through
 "  	colors (Heat Map). Only SVG-Output. If ther is no val 2 column, the layer 1
 "  	entries define the color of their childs
 "  
 "  Version 0.5:
-"  *	In version 0.5 the rekursive method "treemap#reorgHierachy2" is substitute
-"  	through the iterative method "treemap#reorgHierachy3"
+"  *	In version 0.5 the recursive function "treemap#reorgHierachy2" is substitute
+"  	through the iterative function "treemap#reorgHierachy3"
 "  *	SVG-Output with fill color
 
 " TODO
-" Check:	In every column it is only allowed that one description apears one time
-" Output:	In case of SVG and value 2 columns: More Colors
+" Check:	Every unit may have only one parent
 
-" Useful commands
-" tabpagenr()
-" &tabpagemax
 
 " fill colors for Rectangles
 :let g:color = ['blue','grey','red']
@@ -57,17 +66,19 @@
 
 " initialize global variables
 :function! treemap#initialize()
-	" frame data
+	" frame data / will be defined in the main() function
 	":let g:x = 230
 	":let g:y = 65
-	:let g:x = 1024
-	:let g:y = 768
-	:let g:pt = g:x * g:y
+	":let g:x = 1024
+	":let g:y = 768
+	":let g:pt = g:x * g:y
 
 	" val2 average and interval values / is val2 active or not
-	:let g:val2active = "false"
+	:let g:val2Active = "false"
 	:let g:val2Average = 0.00
-	:let g:val2Interval = 20.00
+	:if !exists("g:val2Interval")
+		:let g:val2Interval = 20.00
+	:endif
 
 	" fill colors for Rectangles color index
 	:let g:cIndex = 0
@@ -82,10 +93,12 @@
 	:let g:mess = []
 	:let g:err = 0
 
-	" verbose - all messenges are displayed
-	:let g:verb = 0
+	" verbose - all messenges are displayed if g:verb = 1
+	:if !exists("g:verb")
+		:let g:verb = 0
+	:endif
 
-	" Hierachy flach
+	" Hierachy flat
 	:let g:trHier = []
 
 	" Definition of errors, informations and warnings
@@ -98,9 +111,11 @@
 	:let g:E0003["EN"] = "|E|E0003|The last entry is no numeric value"
 	:let g:E0004 = {"T":"E","O":"A","DE":"|E|E0004|Der Rahmen ist zu klein"}
 	:let g:E0004["EN"] = "|E|E0004|Frame is too small"
+	:let g:E0005 = {"T":"E","O":"A","DE":"|E|E0005|Jede Einheit darf nur einer übergeordneten Einheit zugeordnet sein"}
+	:let g:E0005["EN"] = "|E|E0005|Every unit must have only one parent"
 	" Warnings
 	:let g:W0001 = {"T":"W","O":"A","DE":"|W|W0001|Das Rechteck wird nicht gezeichnet, da Fläche zu gering"}
-	:let g:W0001["EN"] = "|W|W0001|The rectangle is not drawn because the area is too low"
+	:let g:W0001["EN"] = "|W|W0001|The rectangle is not drawn because the area is too small"
 	" Informations
 	:let g:I0001 = {"T":"I","O":"A","DE":"|I|I0001|Die Inputparameter sind korrekt"}
 	:let g:I0001["EN"] = "|I|I0001|Input paramter are correct"
@@ -114,18 +129,20 @@
 	:let g:I0005["EN"] = "|I|I0005|Rectangle is drawn"
 	:let g:I0006 = {"T":"I","O":"A","DE":"|I|I0006|Der Rahmen wurde gezeichnet"}
 	:let g:I0006["EN"] = "|I|I0006|Frame is drawn"
+	:let g:I0007 = {"T":"I","O":"A","DE":"|I|I0007|Jede Einheit bezieht sich auf eine übergerordnete Einheit"}
+	:let g:I0007["EN"] = "|I|I0007|Every unit has only one parent"
 :endf
 
 " go to a special tab(page)
-:function! treemap#gotoTab(nr)
-	:tabfirst
-	:let i = 0
-	:for i in range (0,a:nr-2)
-		:tabnext
-		" :echo i
-	:endfor
-	:unlet i
-:endf
+":function! treemap#gotoTab(nr)
+"	:tabfirst
+"	:let i = 0
+"	:for i in range (0,a:nr-2)
+"		:tabnext
+"		" :echo i
+"	:endfor
+"	:unlet i
+":endf
 
 " returns an object of type rectangle
 :function! treemap#rectangle (posx,posy,lenx,leny)
@@ -144,7 +161,7 @@
 
 	:let hierachy = []
 	:let layerNr = len(a:screen[0])
-	:if g:val2active == "true"
+	:if g:val2Active == "true"
 		:let diff = 3
 	:else
 		:let diff = 2
@@ -161,7 +178,7 @@
 			:let entry = {"layer":i,"desc":layerElements[a][0],"parent":layerElements[a][1]}
 			
 			" add value column 2 to last layer entries
-			:if g:val2active == "true"
+			:if g:val2Active == "true"
 				:if entry.layer == layerNr-3
 					:let entry["val2"] = treemap#getVal2(a:screen,entry.desc)
 				:endif
@@ -400,7 +417,7 @@
 	:if (err == 0)
 		:call add(notes,[g:I0002,""])
 		
-		:if g:val2active == "true"
+		:if g:val2Active == "true"
 			:call treemap#calculateVal2Average(screen)
 		:endif
 	:endif
@@ -478,7 +495,7 @@
 		" is in all rows the column befor the last column a value
 		:if a:screen[1][layerNr-2] =~ str2nr(a:screen[i][layerNr-2])
 			
-			:let g:val2active = "true"
+			:let g:val2Active = "true"
 
 			:try
 				:if !(a:screen[i][layerNr-2] =~ str2nr(a:screen[i][layerNr-2]))
@@ -495,15 +512,15 @@
 		:unlet li
 	:endfor
 	:unlet i
+
+	:call treemap#checkChildParentRelation(a:screen,g:val2Active)
 	
 	:if (err == 0)
 		:call add(notes,[g:I0001,""])
 	:endif
 
 	:call treemap#fillMessage(notes)
-
 	:call treemap#printMessage(notes)
-	
 	:call treemap#interruptRun(err)
 
 	:unlet layerNr
@@ -511,6 +528,72 @@
 	
 	:return notes
 	
+:endf
+
+:function! treemap#checkChildParentRelation(matrix,val2Active)
+	
+	:let notes = []
+	:let err = 0
+
+	:if a:val2Active == "false"
+		:let layerNr = len(a:matrix[0])-1
+	:else
+		:let layerNr = len(a:matrix[0])-2
+	:endif
+
+	:if layerNr > 1
+
+		:let i = 1
+		:for i in range(1,layerNr-1)
+	
+			:let column = layerNr-i	
+
+			:let a = 0 
+			:for item in a:matrix
+			
+				:if a == 0
+					:let a = 1
+					:continue
+				:endif
+
+				:let checkUnit = item[column]
+				:let checkParent = item[column-1]
+			
+				:let b = 0
+				:for unit in a:matrix
+					:if b == 0
+						:let b = 1
+						:continue
+					:endif
+				
+					:if unit[column] == checkUnit
+						:if unit[column-1] != checkParent
+							:let err = 1
+							:call add(notes,[g:E0005,checkUnit." - ".checkParent])
+						:endif
+					:endif
+
+				:endfor
+				:unlet b
+
+
+			
+			:endfor
+			:unlet a
+
+			:let i += 1
+		:endfor
+		:unlet i
+
+	:endif
+	
+	:if err == 0
+		:call add(notes,[g:I0007,""])
+	:endif
+
+	:call treemap#fillMessage(notes)
+	:call treemap#printMessage(notes)
+	:call treemap#interruptRun(err)
 :endf
 
 " break run when an error occur
@@ -604,7 +687,7 @@
 "calculate sum the element of a layer X
 :function! treemap#calculateSum(element,matrix,column)
 
-	:if g:val2active == 'true'
+	:if g:val2Active == 'true'
 		:let diff = 2
 	:else
 		:let diff = 1 
@@ -827,15 +910,25 @@
 
 	" Output = VIM / set frame variables
 	:if a:output == 'VIM'
-		:let g:x = 230
-		:let g:y = 65
+		:if exists("g:ux") && exists("g:uy")
+			:let g:x = g:ux
+			:let g:y = g:uy
+		:else
+			:let g:x = 230
+			:let g:y = 65
+		:endif
 		:let g:pt = g:x * g:y
 	:endif
 
 	" Output = SVG / set frame variables
 	:if a:output == 'SVG'
-		:let g:x = 1024
-		:let g:y = 768
+		:if exists("g:ux") && exists("g:uy")
+			:let g:x = g:ux
+			:let g:y = g:uy
+		:else
+			:let g:x = 1024
+			:let g:y = 768
+		:endif
 		:let g:pt = g:x * g:y
 	:endif
 	
@@ -847,9 +940,9 @@
 
 	" Output = VIM / print rectangles (text)
 	:if a:output == 'VIM'
-		:let g:x = 230
-		:let g:y = 65
-		:let g:pt = g:x * g:y
+		":let g:x = 230
+		":let g:y = 65
+		":let g:pt = g:x * g:y
 		
 		:call treemap#drawFrame()
 		:for item in recs
@@ -859,9 +952,9 @@
 
 	" Output = SVG / print rectangles SVG
 	:if a:output == 'SVG'
-		:let g:x = 1024
-		:let g:y = 768
-		:let g:pt = g:x * g:y
+		":let g:x = 1024
+		":let g:y = 768
+		":let g:pt = g:x * g:y
 		
 		:call treemap#drawRectanglesSVG(recs)
 	:endif
@@ -1007,7 +1100,7 @@
 			" determine Color
 			:let rFill = ''
 			:let val2 = 0
-			:if g:val2active == 'true'
+			:if g:val2Active == 'true'
 				:if child.layer == treemap#getLayerNr(g:trHier)-1
 					:let val2 = child.val2
 				:endif
@@ -1022,7 +1115,7 @@
 			:let actual = actual + rect.ly
 			:let rect.title = child.desc
 			:if rFill == ''
-				:if g:val2active == 'true'
+				:if g:val2Active == 'true'
 					:let rect.fill = 'white'
 				:else
 					:let rect.fill = a:root.fill
@@ -1044,7 +1137,7 @@
 			" determine Color
 			:let rFill = ''
 			:let val2 = 0
-			:if g:val2active == 'true'
+			:if g:val2Active == 'true'
 				:if child.layer == treemap#getLayerNr(g:trHier)-1
 					:let val2 = child.val2
 				:endif
@@ -1059,7 +1152,7 @@
 			:let actual = actual + rect.lx
 			:let rect.title = child.desc
 			:if rFill == ''
-				:if g:val2active == 'true'
+				:if g:val2Active == 'true'
 					:let rect.fill = 'white'
 				:else
 					:let rect.fill = a:root.fill
@@ -1089,7 +1182,7 @@
 	:let fillColor = ''
 	
 	" heat map
-	:if g:val2active == 'true' && a:childLayer == treemap#getLayerNr(g:trHier)-1
+	:if g:val2Active == 'true' && a:childLayer == treemap#getLayerNr(g:trHier)-1
 		:let fillColor = g:color[1]
 		:if a:val2 < g:val2Average - (g:val2Average * g:val2Interval / 100)
 			:let fillColor = g:color[0]
@@ -1099,7 +1192,7 @@
 			:let fillColor = g:color[1]
 		:endif
 	" one color for one layer 1 entry
-	:elseif g:val2active == 'false'
+	:elseif g:val2Active == 'false'
 		:if a:rootLayer == -1
 			:let fillColor = g:color[g:cIndex]
 			:if g:cIndex < len(g:color)-1
