@@ -1,17 +1,24 @@
 "  treemap.vim: (plugin) Creates a treemap in a new tab
-"  Last Change: Fri Apr 17 6:49 PM 2015 MET
+"  Last Change: Wed Apr 23 6:45 PM 2015 MET
 "  Author:	Data-Statiker
 "  Maintainer:  Data-Statiker
-"  Version:     0.8, for Vim 7.4+
+"  Version:     0.9, for Vim 7.4+
 
 "  New:
+"  Version 0.9
+"  *	Title for the treemap
+"  *	Initialize g:tmMess / no error occurs by starting "print log"
+"  *	Namespace for treemap global variables: g:tm*
+"  	To avoid incompatibility to other plugins
+"  *	Small changes in the help file
+"
 "  Version 0.8:
-"  *	Introduce the global variables g:ux and g:uy to set the size from the
+"  *	Introduce the global variables g:tmUx and g:tmUy to set the size from the
 "	treemap. So the size of the treemap could be changed throug the variables:
-"	g:ux = width
-"	g:uy = height
+"	g:tmUx = width
+"	g:tmUy = height
 "  *	Adapt the menu to set the height and width of the treemap
-"  *	Adapt the menu for printing the log variable g:mess
+"  *	Adapt the menu for printing the log variable g:tmMess
 "  *	Update VIM help file
 "  *	For some parameters in the function treemap#initialize()
 "  	Only set the variables when they do not exist
@@ -36,7 +43,7 @@
 "  *	Insert 'throw "oops"' in treemap#interruptRun() so the program stops
 "	in case of error	
 "  *	Create the menu "Plugin - Treemap" tor run the script and set the
-"	variables g:separator, g:output, g:color
+"	variables g:tmSeparator, g:tmOutput, g:tmColor
 "
 "  Version 0.6:
 "  *	Delete not used functions "treemap#reorgHierachy" and "treemap#reorgHierachy2" with
@@ -51,86 +58,92 @@
 "  	through the iterative function "treemap#reorgHierachy3"
 "  *	SVG-Output with fill color
 
-" TODO
-" Check:	Every unit may have only one parent
-
-
+" Variable Definition
 " fill colors for Rectangles
-:let g:color = ['blue','grey','red']
+:let g:tmColor = ['blue','grey','red']
 
-" initialize g:separator
-:let g:separator = "\\t"
+" initialize g:tmSeparator
+:let g:tmSeparator = "\\t"
 
-" initialize g:output
-:let g:output = 'VIM'
+" initialize g:tmOutput
+:let g:tmOutput = 'VIM'
+
+" list for warnings and errors
+:let g:tmMess = []
+:let g:tmErr = 0
 
 " initialize global variables
 :function! treemap#initialize()
 	" frame data / will be defined in the main() function
-	":let g:x = 230
-	":let g:y = 65
-	":let g:x = 1024
-	":let g:y = 768
-	":let g:pt = g:x * g:y
+	":let g:tmX = 230
+	":let g:tmY = 65
+	":let g:tmX = 1024
+	":let g:tmY = 768
+	":let g:pt = g:tmX * g:tmY
 
 	" val2 average and interval values / is val2 active or not
-	:let g:val2Active = "false"
-	:let g:val2Average = 0.00
-	:if !exists("g:val2Interval")
-		:let g:val2Interval = 20.00
+	:let g:tmVal2Active = "false"
+	:let g:tmVal2Average = 0.00
+	:if !exists("g:tmVal2Interval")
+		:let g:tmVal2Interval = 20.00
 	:endif
 
 	" fill colors for Rectangles color index
-	:let g:cIndex = 0
+	:let g:tmCIndex = 0
 
 	" number of layers
-	:let g:lNr = 0
+	:let g:tmLNr = 0
 
 	" actual tabpage
-	:let g:tabMain = tabpagenr()
+	" :let g:tmTabMain = tabpagenr()
 
-	" list for warnings and errors
-	:let g:mess = []
-	:let g:err = 0
-
-	" verbose - all messenges are displayed if g:verb = 1
-	:if !exists("g:verb")
-		:let g:verb = 0
+	" verbose - all messenges are displayed if g:tmVerbose = 1
+	:if !exists("g:tmVerbose")
+		:let g:tmVerbose = 0
 	:endif
 
 	" Hierachy flat
-	:let g:trHier = []
+	:let g:tmTrHier = []
+
+	" Title for the treemap
+	:if !exists("g:tmTitle")
+		:let g:tmTitle = "Treemap"
+	:endif
+
+	" list for warnings and errors
+	:let g:tmMess = []
+	:let g:tmErr = 0
 
 	" Definition of errors, informations and warnings
 	" Errors
-	:let g:E0001 = {"T":"E","O":"A","DE":"|E|E0001|Anzahl Ebenen nicht korrekt"}
-	:let g:E0001["EN"] = "|E|E0001|Number of layers are incorrect"
-	:let g:E0002 = {"T":"E","O":"A","DE":"|E|E0002|Das Programm musste aufgrund eines Fehlers abgebrochen werden"}
-	:let g:E0002["EN"] = "|E|E0002|The program was interupted cause of errors"
-	:let g:E0003 = {"T":"E","O":"A","DE":"|E|E0003|Der letzte Eintrag ist kein numerischer Wert"}
-	:let g:E0003["EN"] = "|E|E0003|The last entry is no numeric value"
-	:let g:E0004 = {"T":"E","O":"A","DE":"|E|E0004|Der Rahmen ist zu klein"}
-	:let g:E0004["EN"] = "|E|E0004|Frame is too small"
-	:let g:E0005 = {"T":"E","O":"A","DE":"|E|E0005|Jede Einheit darf nur einer übergeordneten Einheit zugeordnet sein"}
-	:let g:E0005["EN"] = "|E|E0005|Every unit must have only one parent"
+	:let g:tmE0001 = {"T":"E","O":"A","DE":"|E|E0001|Anzahl Ebenen nicht korrekt"}
+	:let g:tmE0001["EN"] = "|E|E0001|Number of layers are incorrect"
+	:let g:tmE0002 = {"T":"E","O":"A","DE":"|E|E0002|Das Programm musste aufgrund eines Fehlers abgebrochen werden"}
+	:let g:tmE0002["EN"] = "|E|E0002|The program was interupted cause of errors"
+	:let g:tmE0003 = {"T":"E","O":"A","DE":"|E|E0003|Der letzte Eintrag ist kein numerischer Wert"}
+	:let g:tmE0003["EN"] = "|E|E0003|The last entry is no numeric value"
+	:let g:tmE0004 = {"T":"E","O":"A","DE":"|E|E0004|Der Rahmen ist zu klein"}
+	:let g:tmE0004["EN"] = "|E|E0004|Frame is too small"
+	:let g:tmE0005 = {"T":"E","O":"A","DE":"|E|E0005|Jede Einheit darf nur einer übergeordneten Einheit zugeordnet sein"}
+	:let g:tmE0005["EN"] = "|E|E0005|Every unit must have only one parent"
 	" Warnings
-	:let g:W0001 = {"T":"W","O":"A","DE":"|W|W0001|Das Rechteck wird nicht gezeichnet, da Fläche zu gering"}
-	:let g:W0001["EN"] = "|W|W0001|The rectangle is not drawn because the area is too small"
+	:let g:tmW0001 = {"T":"W","O":"A","DE":"|W|W0001|Das Rechteck wird nicht gezeichnet, da Fläche zu gering"}
+	:let g:tmW0001["EN"] = "|W|W0001|The rectangle is not drawn because the area is too small"
 	" Informations
-	:let g:I0001 = {"T":"I","O":"A","DE":"|I|I0001|Die Inputparameter sind korrekt"}
-	:let g:I0001["EN"] = "|I|I0001|Input paramter are correct"
-	:let g:I0002 = {"T":"I","O":"A","DE":"|I|I0002|Die Parameter wurden erfolgreich eingelesen"}
-	:let g:I0002["EN"] = "|I|I0002|Parameter read successfull"
-	:let g:I0003 = {"T":"I","O":"A","DE":"|I|I0003|Hierachie wurde aufgebaut und Summen ermittelt"}
-	:let g:I0003["EN"] = "|I|I0003|Hierachy set up completed / calculating of sums completed"
-	:let g:I0004 = {"T":"I","O":"A","DE":"|I|I0004|Proportionen wurden ermittelt und Hierachie angereichert"}
-	:let g:I0004["EN"] = "|I|I0004|Proportion are calculated and hierachy are enriched"
-	:let g:I0005 = {"T":"I","O":"A","DE":"|I|I0005|Rechteck wurde gezeichnet"}
-	:let g:I0005["EN"] = "|I|I0005|Rectangle is drawn"
-	:let g:I0006 = {"T":"I","O":"A","DE":"|I|I0006|Der Rahmen wurde gezeichnet"}
-	:let g:I0006["EN"] = "|I|I0006|Frame is drawn"
-	:let g:I0007 = {"T":"I","O":"A","DE":"|I|I0007|Jede Einheit bezieht sich auf eine übergerordnete Einheit"}
-	:let g:I0007["EN"] = "|I|I0007|Every unit has only one parent"
+	:let g:tmI0001 = {"T":"I","O":"A","DE":"|I|I0001|Die Inputparameter sind korrekt"}
+	:let g:tmI0001["EN"] = "|I|I0001|Input paramter are correct"
+	:let g:tmI0002 = {"T":"I","O":"A","DE":"|I|I0002|Die Parameter wurden erfolgreich eingelesen"}
+	:let g:tmI0002["EN"] = "|I|I0002|Parameter read successfull"
+	:let g:tmI0003 = {"T":"I","O":"A","DE":"|I|I0003|Hierachie wurde aufgebaut und Summen ermittelt"}
+	:let g:tmI0003["EN"] = "|I|I0003|Hierachy set up completed / calculating of sums completed"
+	:let g:tmI0004 = {"T":"I","O":"A","DE":"|I|I0004|Proportionen wurden ermittelt und Hierachie angereichert"}
+	:let g:tmI0004["EN"] = "|I|I0004|Proportion are calculated and hierachy are enriched"
+	:let g:tmI0005 = {"T":"I","O":"A","DE":"|I|I0005|Rechteck wurde gezeichnet"}
+	:let g:tmI0005["EN"] = "|I|I0005|Rectangle is drawn"
+	:let g:tmI0006 = {"T":"I","O":"A","DE":"|I|I0006|Der Rahmen wurde gezeichnet"}
+	:let g:tmI0006["EN"] = "|I|I0006|Frame is drawn"
+	:let g:tmI0007 = {"T":"I","O":"A","DE":"|I|I0007|Jede Einheit bezieht sich auf eine übergerordnete Einheit"}
+	:let g:tmI0007["EN"] = "|I|I0007|Every unit has only one parent"
 :endf
 
 " go to a special tab(page)
@@ -161,7 +174,7 @@
 
 	:let hierachy = []
 	:let layerNr = len(a:screen[0])
-	:if g:val2Active == "true"
+	:if g:tmVal2Active == "true"
 		:let diff = 3
 	:else
 		:let diff = 2
@@ -178,7 +191,7 @@
 			:let entry = {"layer":i,"desc":layerElements[a][0],"parent":layerElements[a][1]}
 			
 			" add value column 2 to last layer entries
-			:if g:val2Active == "true"
+			:if g:tmVal2Active == "true"
 				:if entry.layer == layerNr-3
 					:let entry["val2"] = treemap#getVal2(a:screen,entry.desc)
 				:endif
@@ -198,7 +211,7 @@
 	:unlet i
 
 	:if (err == 0)
-		:call add(notes,[g:I0003,""])
+		:call add(notes,[g:tmI0003,""])
 	:endif
 
 	:if (err == 1)
@@ -215,7 +228,7 @@
 
 	:let hierachy = treemap#enrichProportion(hierachy)
 
-	:let g:trHier = hierachy
+	:let g:tmTrHier = hierachy
 	
 	:return hierachy
 
@@ -415,9 +428,9 @@
 	:call treemap#checkInput(screen)
 
 	:if (err == 0)
-		:call add(notes,[g:I0002,""])
+		:call add(notes,[g:tmI0002,""])
 		
-		:if g:val2Active == "true"
+		:if g:tmVal2Active == "true"
 			:call treemap#calculateVal2Average(screen)
 		:endif
 	:endif
@@ -437,7 +450,7 @@
 
 :endf
 
-" calculate the average value of all val2 values and set global variable g:val2Average
+" calculate the average value of all val2 values and set global variable g:tmVal2Average
 :function! treemap#calculateVal2Average(screen)
 
 	:let sum = 0.00
@@ -451,7 +464,7 @@
 		:endif
 	:endfor
 		
-	:let g:val2Average = sum / (len(a:screen)-1)
+	:let g:tmVal2Average = sum / (len(a:screen)-1)
 	
 	:unlet sum
 
@@ -472,11 +485,11 @@
 		" are numbers of elements in every row correct?
 		:try
 			:if len(a:screen[i]) != layerNr
-				:call add(notes,[g:E0001,"Zeile: ".li])
+				:call add(notes,[g:tmE0001,"Zeile: ".li])
 				:let err = 1
 			:endif
 		:catch /^Vim\%((\a\+)\)\=:E/
-			:call add(notes,[g:E0001,"Zeile: ".li])
+			:call add(notes,[g:tmE0001,"Zeile: ".li])
 			:let err = 1
 		:endtry
 
@@ -484,7 +497,7 @@
 		:try
 			:if !(a:screen[i][layerNr-1] =~ str2nr(a:screen[i][layerNr-1]))
 				:if i > 0
-					:call add(notes,[g:E0003,"Zeile: ".li])
+					:call add(notes,[g:tmE0003,"Zeile: ".li])
 					:let err = 1
 				:endif
 			:endif
@@ -495,12 +508,12 @@
 		" is in all rows the column befor the last column a value
 		:if a:screen[1][layerNr-2] =~ str2nr(a:screen[i][layerNr-2])
 			
-			:let g:val2Active = "true"
+			:let g:tmVal2Active = "true"
 
 			:try
 				:if !(a:screen[i][layerNr-2] =~ str2nr(a:screen[i][layerNr-2]))
 					:if i > 0
-						:call add(notes,[g:E0003,"Zeile: ".li])
+						:call add(notes,[g:tmE0003,"Zeile: ".li])
 						:let err = 1
 					:endif
 				:endif
@@ -513,10 +526,10 @@
 	:endfor
 	:unlet i
 
-	:call treemap#checkChildParentRelation(a:screen,g:val2Active)
+	:call treemap#checkChildParentRelation(a:screen,g:tmVal2Active)
 	
 	:if (err == 0)
-		:call add(notes,[g:I0001,""])
+		:call add(notes,[g:tmI0001,""])
 	:endif
 
 	:call treemap#fillMessage(notes)
@@ -569,7 +582,7 @@
 					:if unit[column] == checkUnit
 						:if unit[column-1] != checkParent
 							:let err = 1
-							:call add(notes,[g:E0005,checkUnit." - ".checkParent])
+							:call add(notes,[g:tmE0005,checkUnit." - ".checkParent])
 						:endif
 					:endif
 
@@ -588,7 +601,7 @@
 	:endif
 	
 	:if err == 0
-		:call add(notes,[g:I0007,""])
+		:call add(notes,[g:tmI0007,""])
 	:endif
 
 	:call treemap#fillMessage(notes)
@@ -601,10 +614,10 @@
 	:let notes = []
 
 	:if a:err == 1
-		:call add(notes,[g:E0002,""])
+		:call add(notes,[g:tmE0002,""])
 		:call treemap#fillMessage(notes)
 		:call treemap#printMessage(notes)
-		:let g:err = 1
+		:let g:tmErr = 1
 		:sleep 10
 		:throw "oops"
 		":exit
@@ -623,13 +636,13 @@
 		:if language == "DE"
 			:if a:notes[i][0].T == "E"
 				echohl = ErrorMsg | echom a:notes[i][0].DE ." / ". a:notes[i][1] | echohl = None
-			:elseif g:verb == 1
+			:elseif g:tmVerbose == 1
 				echom a:notes[i][0].DE ." ". a:notes[i][1]
 			:endif
 		:else
 			:if a:notes[i][0].T == "E"
 				echohl = ErrorMsg | echom a:notes[i][0].EN ." / ". a:notes[i][1] | echohl = None
-			:elseif g:verb == 1
+			:elseif g:tmVerbose == 1
 				echom a:notes[i][0].EN ." ". a:notes[i][1]
 			:endif
 		:endif
@@ -687,7 +700,7 @@
 "calculate sum the element of a layer X
 :function! treemap#calculateSum(element,matrix,column)
 
-	:if g:val2Active == 'true'
+	:if g:tmVal2Active == 'true'
 		:let diff = 2
 	:else
 		:let diff = 1 
@@ -742,7 +755,7 @@
 	:unlet i
 
 	:if (err == 0)
-		:call add(notes,[g:I0004,""])
+		:call add(notes,[g:tmI0004,""])
 	:endif
 
 	:call treemap#fillMessage(notes)
@@ -761,7 +774,7 @@
 	
 	:if !empty(a:notes)
 		:for note in a:notes
-			:call add(g:mess,note)
+			:call add(g:tmMess,note)
 		:endfor
 	:endif
 
@@ -773,16 +786,16 @@
 	:let notes = []
 	:let err = 0	
 
-	:if (g:x > 1) && (g:y > 1)
+	:if (g:tmX > 1) && (g:tmY > 1)
 
 		:call setpos(".",[0,1,1,0])
 
 		:let a = 0
-		:for a in range (0,g:y+1)
+		:for a in range (0,g:tmY+1)
 			:execute "normal i\<ENTER>\<ESC>"
 			:execute "normal k"	
 			:let i = 0
-			:for i in range (0,g:x+1)
+			:for i in range (0,g:tmX+1)
 				:execute "normal i \<ESC>" 
 			:endfor
 			:unlet i
@@ -790,17 +803,17 @@
 		:endfor
 		:unlet a
 	
-		:let frame = treemap#rectangle(1,1,g:x,g:y)
+		:let frame = treemap#rectangle(1,1,g:tmX,g:tmY)
 		:let frame.title = 'FRAME'
 	
 		:call treemap#drawRectangle(frame)
 	:else
-		:call add(notes,[g:E0004,""])
+		:call add(notes,[g:tmE0004,""])
 		:let err = 1
 	:endif
 	
 	:if (err == 0)
-		:call add(notes,[g:I0006,""])
+		:call add(notes,[g:tmI0006,""])
 	:endif
 
 	:call treemap#fillMessage(notes)
@@ -883,11 +896,11 @@
 		:redraw
 
 	:else
-		:call add(notes,[g:W0001,a:rec.title])
+		:call add(notes,[g:tmW0001,a:rec.title])
 	:endif
 	
 	:if (err == 0)
-		:call add(notes,[g:I0005,a:rec.title])
+		:call add(notes,[g:tmI0005,a:rec.title])
 	:endif
 
 	:call treemap#fillMessage(notes)
@@ -906,30 +919,30 @@
 	
 	:call treemap#initialize()
 	
-	:let g:cIndex = 0
+	:let g:tmCIndex = 0
 
 	" Output = VIM / set frame variables
 	:if a:output == 'VIM'
-		:if exists("g:ux") && exists("g:uy")
-			:let g:x = g:ux
-			:let g:y = g:uy
+		:if exists("g:tmUx") && exists("g:tmUy")
+			:let g:tmX = g:tmUx
+			:let g:tmY = g:tmUy
 		:else
-			:let g:x = 230
-			:let g:y = 65
+			:let g:tmX = 230
+			:let g:tmY = 65
 		:endif
-		:let g:pt = g:x * g:y
+		:let g:pt = g:tmX * g:tmY
 	:endif
 
 	" Output = SVG / set frame variables
 	:if a:output == 'SVG'
-		:if exists("g:ux") && exists("g:uy")
-			:let g:x = g:ux
-			:let g:y = g:uy
+		:if exists("g:tmUx") && exists("g:tmUy")
+			:let g:tmX = g:tmUx
+			:let g:tmY = g:tmUy
 		:else
-			:let g:x = 1024
-			:let g:y = 768
+			:let g:tmX = 1024
+			:let g:tmY = 768
 		:endif
-		:let g:pt = g:x * g:y
+		:let g:pt = g:tmX * g:tmY
 	:endif
 	
 	:let screen = treemap#readScreen(a:separator)
@@ -940,21 +953,26 @@
 
 	" Output = VIM / print rectangles (text)
 	:if a:output == 'VIM'
-		":let g:x = 230
-		":let g:y = 65
-		":let g:pt = g:x * g:y
+		":let g:tmX = 230
+		":let g:tmY = 65
+		":let g:pt = g:tmX * g:tmY
 		
 		:call treemap#drawFrame()
 		:for item in recs
 			:call treemap#drawRectangle(item)
 		:endfor
+
+		:execute "normal" "gg"
+		:execute "normal" "O"
+		:call setline(1,g:tmTitle)
+		
 	:endif
 
 	" Output = SVG / print rectangles SVG
 	:if a:output == 'SVG'
-		":let g:x = 1024
-		":let g:y = 768
-		":let g:pt = g:x * g:y
+		":let g:tmX = 1024
+		":let g:tmY = 768
+		":let g:pt = g:tmX * g:tmY
 		
 		:call treemap#drawRectanglesSVG(recs)
 	:endif
@@ -965,7 +983,7 @@
 :function! treemap#sliceAndDice(hierachy)
 	
 	:let rectangles = []
-	:let root = treemap#rectangle(1,1,g:x,g:y)
+	:let root = treemap#rectangle(1,1,g:tmX,g:tmY)
 	:let root.title = 'FRAME'
 	:let root.fill = ''
 	:let root.layer = -1
@@ -1089,7 +1107,7 @@
 	:let actual = 0
 	:let layer = treemap#getLayerNrDesc(a:childs[0].desc,a:childs)
 	
-	:let rootHier = treemap#getHierachyEntry(a:root.title,g:trHier)
+	:let rootHier = treemap#getHierachyEntry(a:root.title,g:tmTrHier)
 
 	:if a:root.ly > a:root.lx
 		
@@ -1100,8 +1118,8 @@
 			" determine Color
 			:let rFill = ''
 			:let val2 = 0
-			:if g:val2Active == 'true'
-				:if child.layer == treemap#getLayerNr(g:trHier)-1
+			:if g:tmVal2Active == 'true'
+				:if child.layer == treemap#getLayerNr(g:tmTrHier)-1
 					:let val2 = child.val2
 				:endif
 			:endif
@@ -1115,7 +1133,7 @@
 			:let actual = actual + rect.ly
 			:let rect.title = child.desc
 			:if rFill == ''
-				:if g:val2Active == 'true'
+				:if g:tmVal2Active == 'true'
 					:let rect.fill = 'white'
 				:else
 					:let rect.fill = a:root.fill
@@ -1137,8 +1155,8 @@
 			" determine Color
 			:let rFill = ''
 			:let val2 = 0
-			:if g:val2Active == 'true'
-				:if child.layer == treemap#getLayerNr(g:trHier)-1
+			:if g:tmVal2Active == 'true'
+				:if child.layer == treemap#getLayerNr(g:tmTrHier)-1
 					:let val2 = child.val2
 				:endif
 			:endif
@@ -1152,7 +1170,7 @@
 			:let actual = actual + rect.lx
 			:let rect.title = child.desc
 			:if rFill == ''
-				:if g:val2Active == 'true'
+				:if g:tmVal2Active == 'true'
 					:let rect.fill = 'white'
 				:else
 					:let rect.fill = a:root.fill
@@ -1182,23 +1200,23 @@
 	:let fillColor = ''
 	
 	" heat map
-	:if g:val2Active == 'true' && a:childLayer == treemap#getLayerNr(g:trHier)-1
-		:let fillColor = g:color[1]
-		:if a:val2 < g:val2Average - (g:val2Average * g:val2Interval / 100)
-			:let fillColor = g:color[0]
-		:elseif a:val2 > g:val2Average + (g:val2Average * g:val2Interval / 100)
-			:let fillColor = g:color[2]
+	:if g:tmVal2Active == 'true' && a:childLayer == treemap#getLayerNr(g:tmTrHier)-1
+		:let fillColor = g:tmColor[1]
+		:if a:val2 < g:tmVal2Average - (g:tmVal2Average * g:tmVal2Interval / 100)
+			:let fillColor = g:tmColor[0]
+		:elseif a:val2 > g:tmVal2Average + (g:tmVal2Average * g:tmVal2Interval / 100)
+			:let fillColor = g:tmColor[2]
 		:else
-			:let fillColor = g:color[1]
+			:let fillColor = g:tmColor[1]
 		:endif
 	" one color for one layer 1 entry
-	:elseif g:val2Active == 'false'
+	:elseif g:tmVal2Active == 'false'
 		:if a:rootLayer == -1
-			:let fillColor = g:color[g:cIndex]
-			:if g:cIndex < len(g:color)-1
-				:let g:cIndex += 1
+			:let fillColor = g:tmColor[g:tmCIndex]
+			:if g:tmCIndex < len(g:tmColor)-1
+				:let g:tmCIndex += 1
 			:else
-				:let g:cIndex = 0
+				:let g:tmCIndex = 0
 			:endif
 		:endif
 	:else
@@ -1213,7 +1231,7 @@
 " determine the number of layers
 :function! treemap#getLayerNr(hierachy)
 
-	:if g:lNr == 0	
+	:if g:tmLNr == 0	
 
 		:let max = 0
 
@@ -1223,11 +1241,11 @@
 			:endif
 		:endfor
 
-		:let g:lNr = max+1
+		:let g:tmLNr = max+1
 	
 	:endif
 	
-	:return g:lNr
+	:return g:tmLNr
 
 :endf
 
@@ -1248,7 +1266,7 @@
 	:return layer
 :endf
 
-" Print all messages from g:mess
+" Print all messages from g:tmMess
 function! treemap#printAllMessages(messages,lang)
 	
 	:if a:lang == 'DE' || a:lang == 'EN'
@@ -1272,17 +1290,17 @@ function! treemap#printAllMessages(messages,lang)
 	:call setline(1,'<?xml version="1.0" encoding="ISO-8859-1"?>')
 	:call setline(2,'<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="de">')
 	:call setline(3,'<head>')
-	:call setline(4,'<title>Treemap</title>')
+	:call setline(4,'<title>'.g:tmTitle.'</title>')
 	:call setline(5,'</head>')
 	:call setline(6,'<body>')
-	:call setline(7,'<h1>Treemap</h1>')
+	:call setline(7,'<h1>'.g:tmTitle.'</h1>')
 
 	" SVG
 	":call setline(8,'<?xml version="1.0" encoding="ISO-8859-1" standalone="no" ?>')
 	":call setline(9,'<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 20010904//EN" "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd">')
-	:call setline(8,'<svg width="'.g:x.'" height="'.g:y.'" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">')
-	:call setline(9,'<title>Treemap</title>')
-	:call setline(10,'<desc>generierte Treemap</desc>')
+	:call setline(8,'<svg width="'.g:tmX.'" height="'.g:tmY.'" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">')
+	:call setline(9,'<title>'.g:tmTitle.'</title>')
+	:call setline(10,'<desc>powered by TREEMAP VIM PLUGIN</desc>')
 	
 	:let i = 11
 	:for item in a:rectangles
