@@ -5,7 +5,7 @@ VIM-TREEMAP is a vim script to create a treemap from a character seperated input
 For further details read the vim help file:
 ../doc/treemap.txt
 
-Version 0.8
+Version 0.9.1
 
 ### Getting Started
 
@@ -36,12 +36,11 @@ To start the treemap creation:
 
 ### Whats New
 
-Version 0.9
--	Title for the treemap
--	Initialize g:tmMess / no error occurs by starting "print log"
--	Namespace for treemap global variables: g:tm
-	To avoid incompatibility to other plugins
--	Small changes in the help file
+Version 0.9.1:
+- Add corresponding VIM COMMANDS for each menu entry
+- Add Mappings for VIM Commands:
+- Set the default width and height in case of Output Type 'VIM'
+  to 70x25
 
 
 ### Overview
@@ -132,10 +131,10 @@ Download the vimball file treemap.vmb from:
 http://www.vim.org/scripts/script.php?script_id=5157
 
 Install the vimball file with VIM 
-1 Download the file treemap.vmb
-2 vim path/treemap.vmb
-3 :so %
-4 :q
+- Download the file treemap.vmb
+- vim path/treemap.vmb
+- :so %
+- :q
 
 Now you have the menu Plugin-Treemap
 

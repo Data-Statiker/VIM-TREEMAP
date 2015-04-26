@@ -1,11 +1,18 @@
+"  vim:tabstop=2:shiftwidth=2:expandtab:foldmethod=marker:textwidth=79
 "  treemap.vim: (plugin) Creates a treemap in a new tab
-"  Last Change: Wed Apr 23 6:45 PM 2015 MET
-"  Author:	Data-Statiker
+"  Last Change: Wed Apr 26 7:45 PM 2015 MET
+"  Author:	    Data-Statiker
 "  Maintainer:  Data-Statiker
-"  Version:     0.9, for Vim 7.4+
+"  Version:     0.9.1, for Vim 7.4+
 
-"  New:
-"  Version 0.9
+"  New: {{{1
+"  Version 0.9.1:
+"  *	Add corresponding VIM COMMANDS for each menu entry
+"  *	Add Mappings for VIM Commands:
+"  *	Set the default width and height in case of Output Type 'VIM'
+"       to 70*25
+"
+"  Version 0.9:
 "  *	Title for the treemap
 "  *	Initialize g:tmMess / no error occurs by starting "print log"
 "  *	Namespace for treemap global variables: g:tm*
@@ -58,7 +65,7 @@
 "  	through the iterative function "treemap#reorgHierachy3"
 "  *	SVG-Output with fill color
 
-" Variable Definition
+" Variable Definition {{{1
 " fill colors for Rectangles
 :let g:tmColor = ['blue','grey','red']
 
@@ -146,17 +153,7 @@
 	:let g:tmI0007["EN"] = "|I|I0007|Every unit has only one parent"
 :endf
 
-" go to a special tab(page)
-":function! treemap#gotoTab(nr)
-"	:tabfirst
-"	:let i = 0
-"	:for i in range (0,a:nr-2)
-"		:tabnext
-"		" :echo i
-"	:endfor
-"	:unlet i
-":endf
-
+" Object Rectangle {{{1
 " returns an object of type rectangle
 :function! treemap#rectangle (posx,posy,lenx,leny)
 	:let rec = {}
@@ -166,247 +163,7 @@
 	:return rec
 :endf
 
-" units list: entries are dictioniaries: layer, description, value, sum
-:function! treemap#createHierachy(screen)
-	
-	:let notes = []
-	:let err = 0
-
-	:let hierachy = []
-	:let layerNr = len(a:screen[0])
-	:if g:tmVal2Active == "true"
-		:let diff = 3
-	:else
-		:let diff = 2
-	:endif
-
-	:let i = 0
-	:for i in range(0,layerNr-diff)
-		
-		:let layerElements = treemap#groupBy(a:screen,i)
-		:let a = 0	
-		:for a in range(0,len(layerElements)-1)
-			:let entry = {}
-	
-			:let entry = {"layer":i,"desc":layerElements[a][0],"parent":layerElements[a][1]}
-			
-			" add value column 2 to last layer entries
-			:if g:tmVal2Active == "true"
-				:if entry.layer == layerNr-3
-					:let entry["val2"] = treemap#getVal2(a:screen,entry.desc)
-				:endif
-			:endif
-						
-			:let sum = treemap#calculateSum(layerElements[a][0],a:screen,i)
-			:let entry["sum"] = sum
-			:unlet sum
-
-			:call add(hierachy,entry)
-			
-			:unlet entry
-		:endfor
-		:unlet a
-		:unlet layerElements
-	:endfor
-	:unlet i
-
-	:if (err == 0)
-		:call add(notes,[g:tmI0003,""])
-	:endif
-
-	:if (err == 1)
-		:call treemap#interruptRun(err)
-	:endif
-	
-	:call treemap#fillMessage(notes)
-	:call treemap#printMessage(notes)
-
-	:unlet notes
-	:unlet err
-	:unlet layerNr
-	:unlet diff
-
-	:let hierachy = treemap#enrichProportion(hierachy)
-
-	:let g:tmTrHier = hierachy
-	
-	:return hierachy
-
-:endf
-
-:function! treemap#getVal2(screen,lastLayerDesc)
-	
-	:let val2 = 0.00
-	:let layerNr = len(a:screen[1])-3
-	
-	:if !exists("a:screen[1][layerNr+2")
-		
-		:for item in a:screen
-			
-			:if item[layerNr] == a:lastLayerDesc
-				:let val2 = item[layerNr+2] + 0.00
-			:endif
-
-		:endfor
-	:endif
-	:unlet layerNr
-	
-	:return val2	
-
-:endf
-
-:function! treemap#reorgHierachy(hierachy)
-
-	:let layerNr = treemap#getLayerNr(a:hierachy)
-	:let collector = []
-
-	:let i = 0
-	:for i in range(0,layerNr-1)
-
-		:let parents = treemap#getAllParentsPerLayer(a:hierachy,i)
-		
-		:let container = {}
-		:for p in parents
-			:let container[p] = []
-		:endfor
-
-		:for item in a:hierachy
-			
-			:if item.layer == i
-				
-				:for unit in parents
-					
-					:if item.parent == unit || (item.parent == "" && unit == 'FRAME')
-
-						:call add(container[unit],item)
-
-					:endif
-				:endfor
-
-
-			:endif
-
-		:endfor
-		
-		:call add(collector,container)
-
-		:unlet container
-
-	:endfor
-	:unlet i
-	
-	:let i = layerNr-1
-	:while i > 0
-		
-		:for key in keys(collector[i])
-			
-			:for item in collector[i][key]
-				:if i == item.layer
-					:if !exists("item.childs")
-						:let item["childs"] = []
-					:endif		
-					:for key2 in keys(collector[i-1])
-					
-						:for pa in collector[i-1][key2]
-							:if !exists("pa.childs")
-								:let pa["childs"] = []
-							:endif
-							:if item.parent == pa.desc
-
-								:call add(pa["childs"],item)
-							:endif
-
-						:endfor
-
-					:endfor
-				:endif
-			:endfor
-		
-		:endfor
-
-		:let i -= 1
-	:endwhile
-	:unlet i	
-	
-	:let collector2 = collector[0].FRAME
-
-	:for item in collector2
-		:if !exists("item.childs")
-			:let item["childs"] = []
-		:endif	
-	:endfor
-
-	:return collector2
-	
-:endf
-
-:function! treemap#getAllParentsPerLayer(hierachy,layerNr)
-
-	:let parents = []
-
-	:for item in a:hierachy
-		:if item.layer == a:layerNr
-			:let exists_ = ""
-			:for p in parents
-				:if p == item.parent
-					:let exists_ = 'X'
-					:break
-				:endif
-			:endfor
-			:if exists_ != "X"
-				:call add(parents,item.parent)
-			:endif
-		:endif
-	:endfor
-	
-	:if parents[0] == ""
-		:let parents[0] = "FRAME"
-	:endif
-
-	:return parents
-:endf
-
-:function! treemap#getDescEntry(p,hierachy)
-
-	:for item in a:hierachy
-		:if item.desc == a:p
-			:let entry = item
-		:endif	
-	:endfor
-
-	:return entry
-:endf
-
-:function! treemap#getParents(hierachy,layerNr)
-	
-	:let temp = []
-	:let parents = []
-
-	:for item in a:hierachy
-		:if item.layer == a:layerNr
-			:call add(temp,item)
-		:endif
-	:endfor
-	
-	:let parentTemp = ''
-	:let exist = ''
-	:for unit in temp
-		:let parentTemp = unit.desc
-		:for p in parents
-			:if p == parentTemp
-				:let exist = 'X'
-			:endif				
-		:endfor
-
-		:if exist != 'X'
-			:call add(parents,parentTemp)
-		:endif
-		:let exist = ''
-	:endfor
-
-	:return parents
-:endf
-
+" Read & Check Input Data {{{1
 " data are read out of the window and return the values as a double list
 " (matrix)
 :function! treemap#readScreen(separator)
@@ -609,6 +366,250 @@
 	:call treemap#interruptRun(err)
 :endf
 
+" units list: entries are dictioniaries: layer, description, value, sum
+:function! treemap#createHierachy(screen)
+	
+	:let notes = []
+	:let err = 0
+
+	:let hierachy = []
+	:let layerNr = len(a:screen[0])
+	:if g:tmVal2Active == "true"
+		:let diff = 3
+	:else
+		:let diff = 2
+	:endif
+
+	:let i = 0
+	:for i in range(0,layerNr-diff)
+		
+		:let layerElements = treemap#groupBy(a:screen,i)
+		:let a = 0	
+		:for a in range(0,len(layerElements)-1)
+			:let entry = {}
+	
+			:let entry = {"layer":i,"desc":layerElements[a][0],"parent":layerElements[a][1]}
+			
+			" add value column 2 to last layer entries
+			:if g:tmVal2Active == "true"
+				:if entry.layer == layerNr-3
+					:let entry["val2"] = treemap#getVal2(a:screen,entry.desc)
+				:endif
+			:endif
+						
+			:let sum = treemap#calculateSum(layerElements[a][0],a:screen,i)
+			:let entry["sum"] = sum
+			:unlet sum
+
+			:call add(hierachy,entry)
+			
+			:unlet entry
+		:endfor
+		:unlet a
+		:unlet layerElements
+	:endfor
+	:unlet i
+
+	:if (err == 0)
+		:call add(notes,[g:tmI0003,""])
+	:endif
+
+	:if (err == 1)
+		:call treemap#interruptRun(err)
+	:endif
+	
+	:call treemap#fillMessage(notes)
+	:call treemap#printMessage(notes)
+
+	:unlet notes
+	:unlet err
+	:unlet layerNr
+	:unlet diff
+
+	:let hierachy = treemap#enrichProportion(hierachy)
+
+	:let g:tmTrHier = hierachy
+	
+	:return hierachy
+
+:endf
+
+:function! treemap#getVal2(screen,lastLayerDesc)
+	
+	:let val2 = 0.00
+	:let layerNr = len(a:screen[1])-3
+	
+	:if !exists("a:screen[1][layerNr+2")
+		
+		:for item in a:screen
+			
+			:if item[layerNr] == a:lastLayerDesc
+				:let val2 = item[layerNr+2] + 0.00
+			:endif
+
+		:endfor
+	:endif
+	:unlet layerNr
+	
+	:return val2	
+
+:endf
+
+:function! treemap#reorgHierachy(hierachy)
+
+	:let layerNr = treemap#getLayerNr(a:hierachy)
+	:let collector = []
+
+	:let i = 0
+	:for i in range(0,layerNr-1)
+
+		:let parents = treemap#getAllParentsPerLayer(a:hierachy,i)
+		
+		:let container = {}
+		:for p in parents
+			:let container[p] = []
+		:endfor
+
+		:for item in a:hierachy
+			
+			:if item.layer == i
+				
+				:for unit in parents
+					
+					:if item.parent == unit || (item.parent == "" && unit == 'FRAME')
+
+						:call add(container[unit],item)
+
+					:endif
+				:endfor
+
+
+			:endif
+
+		:endfor
+		
+		:call add(collector,container)
+
+		:unlet container
+
+	:endfor
+	:unlet i
+	
+	:let i = layerNr-1
+	:while i > 0
+		
+		:for key in keys(collector[i])
+			
+			:for item in collector[i][key]
+				:if i == item.layer
+					:if !exists("item.childs")
+						:let item["childs"] = []
+					:endif		
+					:for key2 in keys(collector[i-1])
+					
+						:for pa in collector[i-1][key2]
+							:if !exists("pa.childs")
+								:let pa["childs"] = []
+							:endif
+							:if item.parent == pa.desc
+
+								:call add(pa["childs"],item)
+							:endif
+
+						:endfor
+
+					:endfor
+				:endif
+			:endfor
+		
+		:endfor
+
+		:let i -= 1
+	:endwhile
+	:unlet i	
+	
+	:let collector2 = collector[0].FRAME
+
+	:for item in collector2
+		:if !exists("item.childs")
+			:let item["childs"] = []
+		:endif	
+	:endfor
+
+	:return collector2
+	
+:endf
+
+" Functions Utilities {{{1
+:function! treemap#getAllParentsPerLayer(hierachy,layerNr)
+
+	:let parents = []
+
+	:for item in a:hierachy
+		:if item.layer == a:layerNr
+			:let exists_ = ""
+			:for p in parents
+				:if p == item.parent
+					:let exists_ = 'X'
+					:break
+				:endif
+			:endfor
+			:if exists_ != "X"
+				:call add(parents,item.parent)
+			:endif
+		:endif
+	:endfor
+	
+	:if parents[0] == ""
+		:let parents[0] = "FRAME"
+	:endif
+
+	:return parents
+:endf
+
+:function! treemap#getDescEntry(p,hierachy)
+
+	:for item in a:hierachy
+		:if item.desc == a:p
+			:let entry = item
+		:endif	
+	:endfor
+
+	:return entry
+:endf
+
+:function! treemap#getParents(hierachy,layerNr)
+	
+	:let temp = []
+	:let parents = []
+
+	:for item in a:hierachy
+		:if item.layer == a:layerNr
+			:call add(temp,item)
+		:endif
+	:endfor
+	
+	:let parentTemp = ''
+	:let exist = ''
+	:for unit in temp
+		:let parentTemp = unit.desc
+		:for p in parents
+			:if p == parentTemp
+				:let exist = 'X'
+			:endif				
+		:endfor
+
+		:if exist != 'X'
+			:call add(parents,parentTemp)
+		:endif
+		:let exist = ''
+	:endfor
+
+	:return parents
+:endf
+
+
+
 " break run when an error occur
 :function! treemap#interruptRun(err)
 	:let notes = []
@@ -697,7 +698,7 @@
 	:return outputAll
 :endf
 
-"calculate sum the element of a layer X
+" calculate sum the element of a layer X
 :function! treemap#calculateSum(element,matrix,column)
 
 	:if g:tmVal2Active == 'true'
@@ -759,9 +760,7 @@
 	:endif
 
 	:call treemap#fillMessage(notes)
-
 	:call treemap#printMessage(notes)
-	
 	:call treemap#interruptRun(err)
 
 	:unlet err
@@ -780,7 +779,63 @@
 
 :endf
 
-" draw frame
+" determine the number of layers
+:function! treemap#getLayerNr(hierachy)
+
+	:if g:tmLNr == 0	
+
+		:let max = 0
+
+		:for item in a:hierachy
+			:if item.layer > max
+				:let max = item.layer
+			:endif
+		:endfor
+
+		:let g:tmLNr = max+1
+	
+	:endif
+	
+	:return g:tmLNr
+
+:endf
+
+:let g:tmLayNrs = []
+" determine the layer number of a special entry
+:function! treemap#getLayerNrDesc(desc,hierachy)
+
+	:let layer = -1
+
+	:for item in a:hierachy
+		:if item.desc == a:desc
+			:let layer = item.layer
+			:break
+		:endif
+	:endfor
+
+	:call add(g:tmLayNrs,a:desc.': '.layer)
+	:return layer
+:endf
+
+" Print all messages from g:tmMess
+function! treemap#printAllMessages(messages,lang)
+	
+	:if a:lang == 'DE' || a:lang == 'EN'
+		:tabnew
+		:let i = 0
+		:for item in a:messages
+			:let i+= 1
+			:call setline(i,item[0][a:lang].' / '.item[1])
+		:endfor
+		:unlet i
+	:else
+		:echo 'Die Sprache '.a:lang.' ist nicht gepflegt!'
+	:endif
+
+:endf
+
+" Print Treemap {{{1
+" Draw Frame
 :function! treemap#drawFrame()
 	
 	:let notes = []
@@ -904,9 +959,7 @@
 	:endif
 
 	:call treemap#fillMessage(notes)
-
 	:call treemap#printMessage(notes)
-	
 	:call treemap#interruptRun(err)
 
 	:unlet err
@@ -914,6 +967,51 @@
 
 :endf
 
+" SVG Output
+:function! treemap#drawRectanglesSVG(rectangles)
+
+	" HTML part 1	
+	:call setline(1,'<?xml version="1.0" encoding="ISO-8859-1"?>')
+	:call setline(2,'<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="de">')
+	:call setline(3,'<head>')
+	:call setline(4,'<title>'.g:tmTitle.'</title>')
+	:call setline(5,'</head>')
+	:call setline(6,'<body>')
+	:call setline(7,'<h1>'.g:tmTitle.'</h1>')
+
+	" SVG
+	":call setline(8,'<?xml version="1.0" encoding="ISO-8859-1" standalone="no" ?>')
+	":call setline(9,'<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 20010904//EN" "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd">')
+	:call setline(8,'<svg width="'.g:tmX.'" height="'.g:tmY.'" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">')
+	:call setline(9,'<title>'.g:tmTitle.'</title>')
+	:call setline(10,'<desc>powered by TREEMAP VIM PLUGIN</desc>')
+	
+	:let i = 11
+	:for item in a:rectangles
+		:if (item.lx > 1) && (item.ly > 1)
+			:call setline(i,'<rect x="'.item.x.'" y="'.item.y.'" width="'.item.lx.'" height="'.item.ly.'" fill="'.item.fill.'" stroke="black" />')
+			:let i+= 1
+			:let p1 = item.x+10
+			:let p2 = item.y+20
+			:call setline(i,'<text x="'.p1.'" y="'.p2.'" fill="black">'.item.title.'</text>')
+			:unlet p1
+			:unlet p2
+			:let i+= 1
+		:endif
+
+	:endfor
+
+	:call setline(i,'</svg>')
+
+	" HTML part 2
+	:call setline(i+1,'</body>')
+	:call setline(i+2,'</html>')
+
+	:unlet i
+	
+:endf
+
+" Main Function {{{1
 " main function to run the treemap algorithm
 :function! treemap#main(output,separator)
 	
@@ -927,8 +1025,8 @@
 			:let g:tmX = g:tmUx
 			:let g:tmY = g:tmUy
 		:else
-			:let g:tmX = 230
-			:let g:tmY = 65
+			:let g:tmX = 70
+			:let g:tmY = 25
 		:endif
 		:let g:pt = g:tmX * g:tmY
 	:endif
@@ -979,6 +1077,7 @@
 
 :endf
 
+" Calculate the Rectangles {{{1
 " Treemap algorithm Slice and Dice
 :function! treemap#sliceAndDice(hierachy)
 	
@@ -1195,6 +1294,7 @@
 	:return resultList
 :endf
 
+" Colorization
 :function! treemap#getColor(val2,rootLayer,childLayer)
 
 	:let fillColor = ''
@@ -1226,103 +1326,4 @@
 
 	:return fillColor
 
-:endf
-
-" determine the number of layers
-:function! treemap#getLayerNr(hierachy)
-
-	:if g:tmLNr == 0	
-
-		:let max = 0
-
-		:for item in a:hierachy
-			:if item.layer > max
-				:let max = item.layer
-			:endif
-		:endfor
-
-		:let g:tmLNr = max+1
-	
-	:endif
-	
-	:return g:tmLNr
-
-:endf
-
-:let g:layNrs = []
-" determine the layer number of a special entry
-:function! treemap#getLayerNrDesc(desc,hierachy)
-
-	:let layer = -1
-
-	:for item in a:hierachy
-		:if item.desc == a:desc
-			:let layer = item.layer
-			:break
-		:endif
-	:endfor
-
-	:call add(g:layNrs,a:desc.': '.layer)
-	:return layer
-:endf
-
-" Print all messages from g:tmMess
-function! treemap#printAllMessages(messages,lang)
-	
-	:if a:lang == 'DE' || a:lang == 'EN'
-		:tabnew
-		:let i = 0
-		:for item in a:messages
-			:let i+= 1
-			:call setline(i,item[0][a:lang].' / '.item[1])
-		:endfor
-		:unlet i
-	:else
-		:echo 'Die Sprache '.a:lang.' ist nicht gepflegt!'
-	:endif
-
-:endf
-
-" SVG Output
-:function! treemap#drawRectanglesSVG(rectangles)
-
-	" HTML part 1	
-	:call setline(1,'<?xml version="1.0" encoding="ISO-8859-1"?>')
-	:call setline(2,'<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="de">')
-	:call setline(3,'<head>')
-	:call setline(4,'<title>'.g:tmTitle.'</title>')
-	:call setline(5,'</head>')
-	:call setline(6,'<body>')
-	:call setline(7,'<h1>'.g:tmTitle.'</h1>')
-
-	" SVG
-	":call setline(8,'<?xml version="1.0" encoding="ISO-8859-1" standalone="no" ?>')
-	":call setline(9,'<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 20010904//EN" "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd">')
-	:call setline(8,'<svg width="'.g:tmX.'" height="'.g:tmY.'" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">')
-	:call setline(9,'<title>'.g:tmTitle.'</title>')
-	:call setline(10,'<desc>powered by TREEMAP VIM PLUGIN</desc>')
-	
-	:let i = 11
-	:for item in a:rectangles
-		:if (item.lx > 1) && (item.ly > 1)
-			:call setline(i,'<rect x="'.item.x.'" y="'.item.y.'" width="'.item.lx.'" height="'.item.ly.'" fill="'.item.fill.'" stroke="black" />')
-			:let i+= 1
-			:let p1 = item.x+10
-			:let p2 = item.y+20
-			:call setline(i,'<text x="'.p1.'" y="'.p2.'" fill="black">'.item.title.'</text>')
-			:unlet p1
-			:unlet p2
-			:let i+= 1
-		:endif
-
-	:endfor
-
-	:call setline(i,'</svg>')
-
-	" HTML part 2
-	:call setline(i+1,'</body>')
-	:call setline(i+2,'</html>')
-
-	:unlet i
-	
 :endf

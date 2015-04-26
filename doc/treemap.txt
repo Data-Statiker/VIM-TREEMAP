@@ -1,5 +1,5 @@
 " vim: filetype=help foldmethod=marker foldmarker=<<<,>>> nomodifiable readonly
-*treemap.txt*	For Vim version 7.4.  Last change: 2015 Apr 23
+*treemap.txt*	For Vim version 7.4.  Last change: 2015 Apr 26
 
 
                 	  VIM REFERENCE MANUAL 
@@ -7,7 +7,7 @@
                            Data Statiker
 
 	  	Treemap extension plugin (treemap.vim) manual
-	  	treemap.vim version 0.9
+	  	treemap.vim version 0.9.1
 
 For instructions on installing this file, type
 	:help add-local-help
@@ -32,6 +32,8 @@ Homepage: https://github.com/Data-Statiker/VIM-TREEMAP
 7.  Example                                   |treemap-example|
 8.  Colorization                              |treemap-colorization|
 9.  Message Handling                          |treemap-message|
+10. Commands                                  |treemap-commands|
+11. Mappings                                  |treemap-mappings|
 
 {Vi does not have any of this}
 
@@ -46,16 +48,18 @@ First install the plugin: |treemap-install|
 To start the treemap creation:
 - load the inputfile
 - set the separator (;|,|\t|...) in the menu Plugin->Treemap->Separator
-  or set the variable: g:tmSeperator
+  or with the VIM Command :TmSeparator
 - set the output type 'VIM' or 'SVG' in the menu Plugin->Treemap->Output Type
-  or set the variable: g:tmOutput
-- Run the treemap script in the menu Plugin->Treemap->Run    OR
+  or with the VIM Command :TmOutput
+- Run the treemap script in the menu Plugin->Treemap->Run    
+  or with the VIM Command :TmRun
+  OR
   call the main function: call treemap#main(output,separator)
   for example: - call treemap#main('VIM','\t')
                - call treemap#main(g:tmOutput,g:tmSeparator)
 
   +--------------------------------------------------------------+
-  | Warning:                                                     |
+  | Note:                                                        |
   | The decimal separator for the input file is in every language|
   | the point "."                                                |
   |      examples:   23.1                                        |
@@ -65,7 +69,13 @@ To start the treemap creation:
 ==============================================================================
 2.  Whats New						*treemap-new*
 
-Version 0.9
+Version 0.9.1:
+*	Add corresponding VIM COMMANDS for each menu entry: |treemap-commands|
+*	Add Mappings for VIM Commands: |treemap-mappings|
+*	Set the default width and height in case of Output Type 'VIM'
+        to 70*25
+
+Version 0.9:
 *	Title for the treemap
 *	Initialize g:tmMess / no error occurs by starting "print log"
 *	Namespace for treemap global variables: g:tm*
@@ -138,17 +148,17 @@ To create a treemap do the following:
 1 Open this input file in VIM
   vim inputfile.txt
 2 Select the correct separator
-  Menu: Plugin->Treemap->Separator
+  Menu:    Plugin->Treemap->Separator
+  Command: TmSeparator
   In the example case use the separator "Semicolon ;"
-  (Or set the vraiable: :let g:tmSeparator = ";")
 3 Select your favourite output type
-  Menu: Plugin->Treemap->Output Type
-  (Or set the vraiable: :let g:tmOutput = "VIM")
-  see |treemap-configure-output| and |treemap-menu|
+  Menu:    Plugin->Treemap->Output Type
+  Command: TmOutput
+  see |treemap-configure-output| and |treemap-menu| or |TmOutput|
   The standard Output is "VIM <Textfile>"
 4 Start the treemap generation
-  Menu: Plugin->Treemap->Run main()
-  (Or run the function: :call treemap#main(g:tmOutput,g:tmSeparator) )
+  Menu:    Plugin->Treemap->Run main()
+  Command: TmRun
 
 Then a new tab opens. In case of the output type SVG you get the SVG/HTML Code
 in the new tab and in the other case (VIM) the treemap is drawn in the new tab
@@ -169,15 +179,17 @@ Other paramters:
 You can change the size of the treemap with the following variables:
 - g:tmUx - width                               // example: :let g:tmUx = 230
 - g:tmUy - height                              // example: :let g:tmUy = 65
-To do that you can use the menu "Plugin"->"Treemap"->"Size".
+To do that you can use the menu "Plugin"->"Treemap"->"Size"
+or the Vim Commands :TmWidth and :TmHeight
 
 If this parameters aren't set, the default values are taken:
-VIM:  230 * 65
+VIM:  70 * 25
 SVG: 1024 * 768
 
 
-The title of a treemap can defined in the menu:
-   Plugin->Treemap->Title g:tmTitle (|treemap-menu|)
+The title of a treemap can defined in the menu or Command:
+   Menu:    Plugin->Treemap->Title g:tmTitle (|treemap-menu|)
+   Command: |TmTitle|
 
 After executing this menu point youn can insert the name of your Treemap in a
 input pop up.
@@ -192,7 +204,7 @@ In case of output type "SVG":
    - The title is used as a headline for the SVG graphic
 
      +-------------------------------------------------------------+
-     |Warning:                                                     |
+     |Note:                                                        |
      |The decimal separator for the input file is in every language|
      |the point "."                                                |
      |    examples:   23.1                                         |
@@ -288,7 +300,7 @@ Copy the folders 'autoload', 'doc' and 'plugin' to your local vimfiles:
 		directly: let g:tmVal2Interval = 30.00
 
                   +-------------------------------------------------------+
-		  |Warning:                                               |
+		  |Note:                                                  |
 		  |By changing the variable g:tmVal2Interval please always|
                   |specify the value with two decimals.                   |
                   +-------------------------------------------------------+
@@ -309,7 +321,7 @@ Copy the folders 'autoload', 'doc' and 'plugin' to your local vimfiles:
 		 Width:  the number of pixels in the SVG graphic
 		 Height: the number of pixels in the SVG graphic
 		Default values:
-		VIM:  230 * 65
+		VIM:  70 * 25
 		SVG: 1024 * 768
 -----------------------------------------------------------------------------
     5.5 Title                                  *treemap-configure-title*
@@ -321,6 +333,8 @@ Copy the folders 'autoload', 'doc' and 'plugin' to your local vimfiles:
 		In case of output type "SVG":
 		   - The title is used in the HTML Header as <title>
 		   - The title is used as a headline for the SVG graphic
+                You can set the variable directly:
+                   :let g:tmTitle = "My Treemap"
 -----------------------------------------------------------------------------
     5.6 Other                                 *treemap-configure-other*
 	global variable: g:tmVerbose
@@ -526,7 +540,7 @@ Errors:
               EN "The program was interupted cause of errors"
 
 	      Def: There was an error. Because of this error the
-	           program must be stopped.
+	           program has to be stopped.
                    Check the global variable g:tmMess. See also
                                                      |treemap-configure-other|
 						     |treemap-menu|
@@ -540,7 +554,7 @@ Errors:
                    Check your numeric values.
 
               +-----------------------------------------------+
-	      |Hint:                                          |
+	      |Note:                                          |
 	      |The decimal separator is "." in every language.|
               +-----------------------------------------------+
 
@@ -557,7 +571,7 @@ Errors:
 	      Line 5: 7,2 is not a numeric value (decimal separator: ".")
 
 	      +------------------------------------------------------------+
-	      | Hint:                                                      |
+	      | Note:                                                      |
 	      | This error occurs also when you choose a wrong separator   |
 	      | for the input file.                                        |
 	      | See also |treemap-configure-separator|                       |
@@ -648,6 +662,92 @@ Alle messages of a treemap generation run are savesd in the global variable
 g:tmMess. You can create a log file. To do that read:
 |treemap-configure-other|
 |treemap-menu| - Plugin->Treemap->Log g:tmMess
+
+==============================================================================
+10. Commands						*treemap-commands*
+
+For each menu entry there exists a VIM COMMAND (|treemap-menu|):
+
+-----------------------------------------------------------------------------
+								*TmRun*
+Command: TmRun
+Start the treemap generation and call the function
+treemap#main(output,separator)
+with the variables g:tmOutput and g:tmSeparator
+
+-----------------------------------------------------------------------------
+								*TmLog*
+Command: TmLog
+Create a log file.
+Print the messages of the variable g:tmMess in a new tab.
+It calls the function treemap#printAllMessages(g:tmMess,$lang)
+
+-----------------------------------------------------------------------------
+								*TmColor*
+Command: TmColor
+Defines the colors for the rectangles in the SVG output type mode. You have
+a choice between triples of colors.
+You have to type in the first color then press [Enter] and so on.
+
+-----------------------------------------------------------------------------
+								*TmOutput*
+Command: TmOutput
+Defines the output type of the treemap
+- VIM <textfile>: the treemap is drawn in a new tabulator with the signs "|",
+  "-" and "+"
+- SVG <SVG/HTML>: the HTML/SVG code of the treemap is printed in a new
+  tabulator. Save this file and open it in a browser.
+
+-----------------------------------------------------------------------------
+								*TmSeparator*
+Command: TmSeparator
+Defines the character of the separator the input file is separated with
+Semicolon     ;
+Tabulator     \t
+Vertical Bar  |
+Comma         ,
+Slash         /
+Backslash     \
+and any other character
+
+-----------------------------------------------------------------------------
+							*TmWidth* *TmHeight*
+Command: TmWidth
+Command: TmHeight
+Defines the size of the treemap. The width and the height.
+In case of output type "VIM":
+ Width:  the number of colums used in the textfile
+ Height: the number of rows used in the textfile
+In case of output type "SVG":
+ Width:  the number of pixels in the SVG graphic
+ Height: the number of pixels in the SVG graphic
+
+-----------------------------------------------------------------------------
+								*TmTitle*
+Command: TmTitle
+Defines the title of the treemap.
+In case of output type "VIM":
+   The title is written in line 1 of the output tab
+In case of output type "SVG":
+   - The title is used in the HTML Header as <title>
+   - The title is used as a headline for the SVG graphic
+
+==============================================================================
+11. Mappings						*treemap-mappings*
+
+For the following menu entries / VIM Commands there exists a Mapping:
+
+|  Key         |  Command     |
+*******************************
+|  <leader>tr  |  |TmRun|       |
+|  <leader>tl  |  |TmLog|       |
+
+The <leader> is the sign of the variable mapleader. If this variable is
+not set the leader key is the backslash "\".
+See also: |<leader>|
+
+example:
+Type \tr to start the treemap generation (Command :TmRun).
 
 ==============================================================================
 vim:tw=78:fo=tcq2:ts=8:ft=help:norl:

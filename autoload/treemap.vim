@@ -1,3 +1,6 @@
+" vim:tabstop=2:shiftwidth=2:expandtab:foldmethod=marker:textwidth=79
+
+" Menu {{{1
 " Run
 :menu Plugin.&Treemap.&Run<tab>main()  :call treemap#main(g:tmOutput,g:tmSeparator)<CR>
 
@@ -31,3 +34,28 @@
 " Size
 :menu Plugin.&Treemap.&Size.Width<tab>g:tmUx  :let g:tmUx = inputdialog("Width:",1024,1024)<CR>
 :menu Plugin.&Treemap.&Size.Height<tab>g:tmUy  :let g:tmUy = inputdialog("Height:",768,768)<CR>
+
+" Commands {{{1
+:command! -count=1 TmRun
+      \ call treemap#main(g:tmOutput,g:tmSeparator)
+:command! -count=1 TmLog
+      \ call treemap#printAllMessages(g:tmMess,$lang)
+:command! -count=1 TmTitle
+      \ let g:tmTitle =  input("Title: ","Treemap")
+:command! -count=1 TmColor
+      \ let g:tmColor = [] |
+      \ call add(g:tmColor,input("Choose first Color: ","blue")) |
+      \ call add(g:tmColor,input("Choose second Color: ","grey")) |
+      \ call add(g:tmColor,input("Choose first Color: ","red"))
+:command! -count=1 TmSeparator
+      \ let g:tmSeparator =  input("Separator: ","\t")
+:command! -count=1 TmOutput
+      \ let g:tmOutput =  input("Output Type: ","VIM")
+:command! -count=1 TmWidth
+      \ let g:tmUx=  input("Width: ","70")
+:command! -count=1 TmHeight
+      \ let g:tmUy=  input("Hight: ","25")
+
+" Mappings {{{1
+:map <Leader>tr  :TmRun<Esc>
+:map <Leader>tl  :TmLog<Esc>
