@@ -1,68 +1,73 @@
 "  vim:tabstop=2:shiftwidth=2:expandtab:foldmethod=marker:textwidth=79
 "  treemap.vim: (plugin) Creates a treemap in a new tab
-"  Last Change: Wed Apr 26 7:45 PM 2015 MET
+"  Last Change: Tue Apr 28 7:45 PM 2015 MET
 "  Author:	    Data-Statiker
 "  Maintainer:  Data-Statiker
-"  Version:     0.9.1, for Vim 7.4+
+"  Version:     0.9.2, for Vim 7.4+
 
 "  New: {{{1
+"  Version 0.9.2:
+"  *	New Commands TmCreate and TmPrint
+"     To seperate the calculating and drawing of treemap
+"  *  Create folders in plugin files for a clear view
+"
 "  Version 0.9.1:
 "  *	Add corresponding VIM COMMANDS for each menu entry
 "  *	Add Mappings for VIM Commands:
 "  *	Set the default width and height in case of Output Type 'VIM'
-"       to 70*25
+"     to 70*25
 "
 "  Version 0.9:
 "  *	Title for the treemap
 "  *	Initialize g:tmMess / no error occurs by starting "print log"
 "  *	Namespace for treemap global variables: g:tm*
-"  	To avoid incompatibility to other plugins
+"  	  To avoid incompatibility to other plugins
 "  *	Small changes in the help file
 "
 "  Version 0.8:
 "  *	Introduce the global variables g:tmUx and g:tmUy to set the size from the
-"	treemap. So the size of the treemap could be changed throug the variables:
-"	g:tmUx = width
-"	g:tmUy = height
+"	    treemap. So the size of the treemap could be changed throug the variables:
+"	    g:tmUx = width
+"	    g:tmUy = height
 "  *	Adapt the menu to set the height and width of the treemap
 "  *	Adapt the menu for printing the log variable g:tmMess
 "  *	Update VIM help file
 "  *	For some parameters in the function treemap#initialize()
-"  	Only set the variables when they do not exist
+"  	  Only set the variables when they do not exist
 "  *	New function treemap#checkChildParentRelation(matrix,val2Active)
-"  	Check if every unit has only one parent
+"  	  Check if every unit has only one parent
 "
 "  Version 0.7:
 "  *	In version 0.7 the output paramater is created for the function
-"  	treemap#main(). The paramater output could have the values "VIM" or
-"  	"SVG".
-"  	VIM: Rectangles are created in a new tab with the signs "-", "|" and "+" 
-"  	SVG: Rectangles are descripted in a SVG structure imbedded in a html
-"  	file 
+"  	  treemap#main(). The paramater output could have the values "VIM" or
+"  	  "SVG".
+"  	   VIM: Rectangles are created in a new tab with the signs "-", "|" and "+" 
+"  	   SVG: Rectangles are descripted in a SVG structure imbedded in a html
+"  	        file 
 "  *	New function treemap#initialize for initializing global variables
 "  *	New parameter separator for the method treemap#main(). So the input
-"  	file could be separated by ";" or "\t" (tab) or any other signs. The values
-"  	of these parameter are for example:
-"  	;	for semicolon separated files
-"  	\t	for tabulator separated files
-"  	Examples: :call treemap#main('VIM',';')
+"  	  file could be separated by ";" or "\t" (tab) or any other signs. The values
+"  	  of these parameter are for example:
+"  	    ;	for semicolon separated files
+"  	   \t	for tabulator separated files
+"  	  Examples: :call treemap#main('VIM',';')
 "  		  :call treemap#main('SVG','\t')
 "  *	Insert 'throw "oops"' in treemap#interruptRun() so the program stops
-"	in case of error	
+"	    in case of error	
 "  *	Create the menu "Plugin - Treemap" tor run the script and set the
-"	variables g:tmSeparator, g:tmOutput, g:tmColor
+"	    variables g:tmSeparator, g:tmOutput, g:tmColor
 "
 "  Version 0.6:
 "  *	Delete not used functions "treemap#reorgHierachy" and "treemap#reorgHierachy2" with
-"  	all sub functions
+"  	  all sub functions
 "  *	Rename function "treemap#reorgHierachy3" to "treemap#reorgHierachy"
 "  *	Add a second value column. This value is represented in the treemap through
-"  	colors (Heat Map). Only SVG-Output. If ther is no val 2 column, the layer 1
-"  	entries define the color of their childs
+"  	  colors (Heat Map). Only SVG-Output. If ther is no val 2 column, the layer 1
+"  	  entries define the color of their childs
 "  
 "  Version 0.5:
 "  *	In version 0.5 the recursive function "treemap#reorgHierachy2" is substitute
-"  	through the iterative function "treemap#reorgHierachy3"
+"  	  through the iterative function "treemap#reorgHierachy3"
 "  *	SVG-Output with fill color
 
 " Variable Definition {{{1
@@ -86,7 +91,7 @@
 	":let g:tmY = 65
 	":let g:tmX = 1024
 	":let g:tmY = 768
-	":let g:pt = g:tmX * g:tmY
+	":let g:tmPt = g:tmX * g:tmY
 
 	" val2 average and interval values / is val2 active or not
 	:let g:tmVal2Active = "false"
@@ -133,6 +138,8 @@
 	:let g:tmE0004["EN"] = "|E|E0004|Frame is too small"
 	:let g:tmE0005 = {"T":"E","O":"A","DE":"|E|E0005|Jede Einheit darf nur einer übergeordneten Einheit zugeordnet sein"}
 	:let g:tmE0005["EN"] = "|E|E0005|Every unit must have only one parent"
+ 	:let g:tmE0006 = {"T":"E","O":"A","DE":"|E|E0006|Für diese Funktion (TmCreate) muss ein Bereich markiert sein"}
+ 	:let g:tmE0006["EN"] = "|E|E0006|This function need a marked area"
 	" Warnings
 	:let g:tmW0001 = {"T":"W","O":"A","DE":"|W|W0001|Das Rechteck wird nicht gezeichnet, da Fläche zu gering"}
 	:let g:tmW0001["EN"] = "|W|W0001|The rectangle is not drawn because the area is too small"
@@ -166,13 +173,31 @@
 " Read & Check Input Data {{{1
 " data are read out of the window and return the values as a double list
 " (matrix)
-:function! treemap#readScreen(separator)
+:function! treemap#readScreen(separator,area)
 	
 	:let notes = []
 	:let err = 0
+  
+  :if a:area == 'block'  "input data are from a visual block
+    :execute 'normal gv"ay'
+    :let buffer = split(@a,"\n")
+    " insert first line (headline)
+    :let tmTemp = split(buffer[0],"\t")
+    :let tmHeadline = ""
+    :let tmI = 0
+    :for item in tmTemp
+      :let tmI += 1
+      :let tmHeadline = tmHeadline."Head"
+      :if tmI < len(tmTemp)
+        :let tmHeadline = tmHeadline."\t"
+      :endif
+    :endfor
+    :call insert(buffer,tmHeadline,0)
+  :else  " a:area == file
+    :let buffer = getline(1,line("$"))
+  :endif
 
-	:let buffer = getline(1,line("$"))
-	:let screen = []
+  :let screen = []
 	:let i = 0
 	:for i in range(0,len(buffer)-1)
 		
@@ -262,7 +287,7 @@
 			:let err = 1
 		:endtry
 		
-		" is in all rows the column befor the last column a value
+		" is in all rows the column before the last column a value
 		:if a:screen[1][layerNr-2] =~ str2nr(a:screen[i][layerNr-2])
 			
 			:let g:tmVal2Active = "true"
@@ -747,7 +772,7 @@
 
 		:let prop = a:hierachy[i].sum * 100 / sum
 		:let a:hierachy[i]["prop"] = prop
-		:let pt = g:pt * prop / 100
+		:let pt = g:tmPt * prop / 100
 		:let a:hierachy[i]["pt"] = pt
 
 		:unlet prop
@@ -836,21 +861,21 @@ function! treemap#printAllMessages(messages,lang)
 
 " Print Treemap {{{1
 " Draw Frame
-:function! treemap#drawFrame()
+:function! treemap#drawFrame(column,line)
 	
 	:let notes = []
 	:let err = 0	
 
 	:if (g:tmX > 1) && (g:tmY > 1)
 
-		:call setpos(".",[0,1,1,0])
+		:call setpos(".",[0,a:line,1,0])
 
 		:let a = 0
-		:for a in range (0,g:tmY+1)
+		:for a in range (0,g:tmY+1+a:line)
 			:execute "normal i\<ENTER>\<ESC>"
 			:execute "normal k"	
 			:let i = 0
-			:for i in range (0,g:tmX+1)
+			:for i in range (0,g:tmX+1+a:column)
 				:execute "normal i \<ESC>" 
 			:endfor
 			:unlet i
@@ -858,7 +883,7 @@ function! treemap#printAllMessages(messages,lang)
 		:endfor
 		:unlet a
 	
-		:let frame = treemap#rectangle(1,1,g:tmX,g:tmY)
+		:let frame = treemap#rectangle(a:column,a:line,g:tmX,g:tmY)
 		:let frame.title = 'FRAME'
 	
 		:call treemap#drawRectangle(frame)
@@ -1028,7 +1053,7 @@ function! treemap#printAllMessages(messages,lang)
 			:let g:tmX = 70
 			:let g:tmY = 25
 		:endif
-		:let g:pt = g:tmX * g:tmY
+		:let g:tmPt = g:tmX * g:tmY
 	:endif
 
 	" Output = SVG / set frame variables
@@ -1040,10 +1065,10 @@ function! treemap#printAllMessages(messages,lang)
 			:let g:tmX = 1024
 			:let g:tmY = 768
 		:endif
-		:let g:pt = g:tmX * g:tmY
+		:let g:tmPt = g:tmX * g:tmY
 	:endif
 	
-	:let screen = treemap#readScreen(a:separator)
+	:let screen = treemap#readScreen(a:separator,"file")
 	:let hier = treemap#createHierachy(screen)
 	:let nestedHier = treemap#reorgHierachy(hier)
 	:let recs = treemap#sliceAndDice(nestedHier)
@@ -1051,11 +1076,8 @@ function! treemap#printAllMessages(messages,lang)
 
 	" Output = VIM / print rectangles (text)
 	:if a:output == 'VIM'
-		":let g:tmX = 230
-		":let g:tmY = 65
-		":let g:pt = g:tmX * g:tmY
 		
-		:call treemap#drawFrame()
+		:call treemap#drawFrame(1,1)
 		:for item in recs
 			:call treemap#drawRectangle(item)
 		:endfor
@@ -1068,11 +1090,75 @@ function! treemap#printAllMessages(messages,lang)
 
 	" Output = SVG / print rectangles SVG
 	:if a:output == 'SVG'
-		":let g:tmX = 1024
-		":let g:tmY = 768
-		":let g:pt = g:tmX * g:tmY
-		
 		:call treemap#drawRectanglesSVG(recs)
+	:endif
+
+:endf
+
+" Only create the rectangles of a treemap, but don't print it
+:function! treemap#create(separator)
+	
+  "set width and height
+  :if exists("g:tmUx") && exists("g:tmUy")
+		:let g:tmX = g:tmUx
+		:let g:tmY = g:tmUy
+	:else
+		:let g:tmX = 70
+		:let g:tmY = 25
+	:endif
+	:let g:tmPt = g:tmX * g:tmY
+
+  :call treemap#initialize()
+
+  :let notes = []
+  :let err = 0
+
+  " check if a visual-block is active
+  :if char2nr(visualmode()) != 22 && visualmode() != 'v'
+    :call add(notes,[g:tmE0006,""])
+    :let err = 1
+    :call treemap#fillMessage(notes)
+	  :call treemap#printMessage(notes)
+  	:call treemap#interruptRun(err)
+  :endif
+
+  :let screen = treemap#readScreen(a:separator,"block")
+	:let hier = treemap#createHierachy(screen)
+	:let nestedHier = treemap#reorgHierachy(hier)
+	:let recs = treemap#sliceAndDice(nestedHier)
+	
+  " Save the calculated rectangles to the clipboard
+  :let g:tmClipboard = recs
+  :let g:tmClipSize = {'x':g:tmX,'y':g:tmY}
+
+:endf
+
+:function! treemap#print(output)
+  
+  " read width and height from g:tmClipSize
+  :let g:tmX = g:tmClipSize.x
+  :let g:tmY = g:tmClipSize.y
+
+  " Output = VIM / print rectangles (text)
+	:if a:output == 'VIM'
+	
+    :let s:tmPos = getpos(".")
+    :let s:lnum = s:tmPos[1]
+    :let s:col = s:tmPos[2]
+
+		:call treemap#drawFrame(s:col,s:lnum)
+		:for item in g:tmClipboard
+      :let item.x = item.x + s:col
+      :let item.y = item.y + s:lnum
+			:call treemap#drawRectangle(item)
+		:endfor
+
+	:endif
+
+	" Output = SVG / print rectangles SVG
+	:if a:output == 'SVG'
+    :tabnew
+		:call treemap#drawRectanglesSVG(g:tmClipboard)
 	:endif
 
 :endf

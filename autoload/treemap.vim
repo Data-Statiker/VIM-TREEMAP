@@ -4,6 +4,10 @@
 " Run
 :menu Plugin.&Treemap.&Run<tab>main()  :call treemap#main(g:tmOutput,g:tmSeparator)<CR>
 
+" Create & Print
+:menu Plugin.&Treemap.&Create<tab>create()  :call treemap#create(g:tmSeparator)<CR>
+:menu Plugin.&Treemap.&Print<tab>print()  :call treemap#print(g:tmSeparator)<CR>
+
 " Print log variable g:tmMess
 :menu Plugin.&Treemap.&Log<tab>g:tmMess  :call treemap#printAllMessages(g:tmMess,$lang)<CR>
 
@@ -38,6 +42,10 @@
 " Commands {{{1
 :command! -count=1 TmRun
       \ call treemap#main(g:tmOutput,g:tmSeparator)
+:command! -count=1 TmCreate
+      \ call treemap#create(g:tmSeparator)
+:command! -count=1 TmPrint
+      \ call treemap#print(g:tmOutput)
 :command! -count=1 TmLog
       \ call treemap#printAllMessages(g:tmMess,$lang)
 :command! -count=1 TmTitle
@@ -58,4 +66,6 @@
 
 " Mappings {{{1
 :map <Leader>tr  :TmRun<Esc>
+:map <Leader>tc  :TmCreate<Esc>
+:map <Leader>tp  :TmPrint<Esc>
 :map <Leader>tl  :TmLog<Esc>

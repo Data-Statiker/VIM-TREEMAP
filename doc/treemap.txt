@@ -1,5 +1,5 @@
 " vim: filetype=help foldmethod=marker foldmarker=<<<,>>> nomodifiable readonly
-*treemap.txt*	For Vim version 7.4.  Last change: 2015 Apr 26
+*treemap.txt*	For Vim version 7.4.  Last change: 2015 Apr 28
 
 
                 	  VIM REFERENCE MANUAL 
@@ -7,7 +7,7 @@
                            Data Statiker
 
 	  	Treemap extension plugin (treemap.vim) manual
-	  	treemap.vim version 0.9.1
+	  	treemap.vim version 0.9.2
 
 For instructions on installing this file, type
 	:help add-local-help
@@ -27,7 +27,9 @@ Homepage: https://github.com/Data-Statiker/VIM-TREEMAP
     5.3 Colors                                |treemap-configure-color|
     5.4 Size                                  |treemap-configure-size|
     5.5 Title                                 |treemap-configure-title|
-    5.6 Other                                 |treemap-configure-other|
+    5.6 Logs                                  |treemap-configure-logs|
+    5.7 Clipboard                             |treemap-configure-clipboard|
+    5.8 Other                                 |treemap-configure-other|
 6.  Menu                                      |treemap-menu|
 7.  Example                                   |treemap-example|
 8.  Colorization                              |treemap-colorization|
@@ -48,7 +50,7 @@ First install the plugin: |treemap-install|
 To start the treemap creation:
 - load the inputfile
 - set the separator (;|,|\t|...) in the menu Plugin->Treemap->Separator
-  or with the VIM Command :TmSeparator
+  or with the VIM Command :TmSeparator (<leader>tr)
 - set the output type 'VIM' or 'SVG' in the menu Plugin->Treemap->Output Type
   or with the VIM Command :TmOutput
 - Run the treemap script in the menu Plugin->Treemap->Run    
@@ -66,8 +68,15 @@ To start the treemap creation:
   |                1020.23                                       |
   +--------------------------------------------------------------+
 
+Use commands |TmCreate| and |TmPrint| instead of |TmRun|.
+
 ==============================================================================
 2.  Whats New						*treemap-new*
+
+Version 0.9.2:
+*	New Commands TmCreate and TmPrint
+	To seperate the calculating and drawing of treemap
+*	Create folders in plugin files for a clear view
 
 Version 0.9.1:
 *	Add corresponding VIM COMMANDS for each menu entry: |treemap-commands|
@@ -145,24 +154,62 @@ xml;xmlcleaner.vim;16
 xml;readme.md;7
 
 To create a treemap do the following:
-1 Open this input file in VIM
-  vim inputfile.txt
-2 Select the correct separator
-  Menu:    Plugin->Treemap->Separator
-  Command: TmSeparator
-  In the example case use the separator "Semicolon ;"
-3 Select your favourite output type
-  Menu:    Plugin->Treemap->Output Type
-  Command: TmOutput
-  see |treemap-configure-output| and |treemap-menu| or |TmOutput|
-  The standard Output is "VIM <Textfile>"
-4 Start the treemap generation
-  Menu:    Plugin->Treemap->Run main()
-  Command: TmRun
+1  Open this input file in VIM
+   vim inputfile.txt
 
-Then a new tab opens. In case of the output type SVG you get the SVG/HTML Code
-in the new tab and in the other case (VIM) the treemap is drawn in the new tab
-with the signs "|","+" and "-".
+2  Select the correct separator
+   Menu:    Plugin->Treemap->Separator
+   Command: TmSeparator
+   In the example case use the separator "Semicolon ;"
+
+3  Select your favourite output type
+   Menu:    Plugin->Treemap->Output Type
+   Command: TmOutput
+   see |treemap-configure-output| and |treemap-menu| or |TmOutput|
+   The standard Output is "VIM <Textfile>"
+
+4a Start the treemap generation
+   Menu:    Plugin->Treemap->Run main()
+   Command: TmRun
+   Mapping: <leader>tr (in most cases <leader> = "\")
+   This call needs a headline!
+   Then a new tab opens. In case of the output type SVG you get
+   the SVG/HTML Code in the new tab and in the other case (VIM)
+   the treemap is drawn in the new tab with the signs "|","+" 
+   and "-".
+
+4b Instead of using 4a you can also use the commands
+   |TmCreate| and |TmPrint|.
+   Menu:     Plugin->Treemap->Create create()
+             Plugin->Treemap->Print print()
+   Commands: TmCreate
+             TmPrint
+   Mappings: <leader>tc
+             <leader>tp
+   TmCreate creates the rectangles and save this to the tmClipboard.
+   TmPrint draw the rectangles to the current position of your cursor. 
+
+       +--------------------------------------------------------+
+       |Note:                                                   |
+       |To use TmCreate you have to select a marked area of the |
+       |input data! Don't select a headline!!                   |
+       |                                                        |
+       |If you use the visual-mode, don't use the command       |
+       |":TmCreate". You overwrite your data with that.         |
+       |Use instead the menu entry "Create" or <leader>tc.      |
+       |(visual-block mode is no problem)                       |
+       +--------------------------------------------------------+
+
+       +-------------------------------------------------------------+
+       |Note:                                                        |
+       |You start the visual mode with: 'v'                          |
+       |You start the visual block mode with:                        |
+       |<Ctrl-V> Linux                                               |
+       |<Ctrl-Q> Windows                                             |
+       |Then use the keys "h, j, k, l" to mark the area you want to  |
+       |select. (Keys: h - <LEFT>, j - <DOWN>, k - <UP>, l - <RIGHT>)|
+       +-------------------------------------------------------------+ 
+
 
 Instead of use the menu you can set the paramters and start the generation
 directly:
@@ -192,7 +239,7 @@ The title of a treemap can defined in the menu or Command:
    Command: |TmTitle|
 
 After executing this menu point youn can insert the name of your Treemap in a
-input pop up.
+input popup.
 
 You can also set the variable g:tmTitle directly:
    :let g:tmTitle = "MyTreemapName"
@@ -336,7 +383,7 @@ Copy the folders 'autoload', 'doc' and 'plugin' to your local vimfiles:
                 You can set the variable directly:
                    :let g:tmTitle = "My Treemap"
 -----------------------------------------------------------------------------
-    5.6 Other                                 *treemap-configure-other*
+    5.6 Logs                                 *treemap-configure-logs*
 	global variable: g:tmVerbose
 		if "g:tmVerbose == 0" only error messages are displayed
 		if "g:tmVerbose == 1" all messages are displayed (includes warnings
@@ -358,6 +405,35 @@ Copy the folders 'autoload', 'doc' and 'plugin' to your local vimfiles:
 		
 		example:
 		:call treemap#printAllMessages(g:tmMess,"EN")
+-----------------------------------------------------------------------------
+    5.7 Clipboard                               *treemap-configure-clipboard*
+	global variable: g:tmClipboard
+               In case of execute the command TmCreate the calculated
+               rectangles are saved in this variable.
+               The saved rectangles are necessary for using the command
+               TmPrint. This command draw the rectangles of the tmClipboard
+               at the position of your cursor
+               Don't change this variable.
+        global variable: g:tmClipSize
+               Default value: {'x':70,'y':25}
+               Are the rectangles created with the command |TmCreate| the
+               width and height of the generated treemap is saved in this
+               dictionary variable {'x':'width','y':'height'}.
+               This informations are needed for printing the treemap later
+               with |TmPrint|.
+               Don't change this variable.
+-----------------------------------------------------------------------------
+    5.8 Other                                 *treemap-configure-other*
+	global variable: g:tmLayNrs
+               After a treemap generation in the variable g:tmLayers the
+               input entities are saved with their layer number.
+               Example: "Entity 1" : 2
+                        Means that the entity 1 has the layer number 2.
+               Don't change this variable.
+
+	global variable: g:tmLNr
+               In this variable is the number of layers saved.
+               Don't change this variable.
 
 ==============================================================================
 6.  Menu                                      *treemap-menu*
@@ -366,6 +442,46 @@ Plugin->Treemap->Run main()
 Start the treemap generation and call the function
 treemap#main(output,separator)
 with the variables g:tmOutput and g:tmSeparator
+
+The input window needs a headline!
+The output is written in a new tab.
+
+-----------------------------------------------------------------------------
+
+Plugin->Treemap->Create create()
+Start the treemap generation and call the function
+treemap#create(separator)
+with the variable g:tmSeparator
+
+Before starting this command mark an area in visual or visual-block mode. The
+content of the marked area is the input data for the generation.
+see |visual-mode|
+see |visual-block|
+(Don't select a headline!!)
+
+This function only calculates the rectangles and the result is saved in
+the tmClipboard (g:tmClipboard).
+The rectangles are not drawn anywhere.
+
+     +-------------------------------------------------------------+
+     |Note:                                                        |
+     |You start the visual mode with: 'v'
+     |You start the visual block mode with:                        |
+     |<Ctrl-V> Linux                                               |
+     |<Ctrl-Q> Windows                                             |
+     |Then use the keys "h, j, k, l" to mark the area you want to  |
+     |select. (Keys: h - <LEFT>, j - <DOWN>, k - <UP>, l - <RIGHT>)|
+     +-------------------------------------------------------------+
+
+-----------------------------------------------------------------------------
+
+Plugin->Treemap->Print print()
+Start a treemap printing and call the function
+treemap#print(output)
+with the variable g:tmOutput
+
+The rectangles that are saved in the tmClipboard are drawn at the
+current position of your cursor.
 
 -----------------------------------------------------------------------------
 
@@ -576,6 +692,7 @@ Errors:
 	      | for the input file.                                        |
 	      | See also |treemap-configure-separator|                       |
               +------------------------------------------------------------+
+
 								*E0004*
 	E0004 DE "Der Rahmen ist zu klein"
 	      EN "Frame is too small"
@@ -601,6 +718,17 @@ Errors:
 	      In this case treemap.txt has two parents. See line 3 and 5.
 	      In line 3 the parent of treemap.txt is Treemap.
 	      In line 5 the parent of treemap.txt is XML.
+
+								*E0006*
+	E0006 DE "Für diese Funktion (TmCreate) muss ein Bereich markiert sein"
+              EN "This function need a marked area"
+	      
+              Def: The function treemap#create(separator) or the VIM
+                   Command TmCreate need a marked area in visual mode
+                   or visual-block mode.
+                   (Select no headline in the visual marked area!!)
+                   see |visual-mode|
+                   see |visual-block|
 
 Warnings:
 								*W0001*
@@ -658,7 +786,7 @@ Informations:
 	      Def: Every unit has only one parent. The error |E0005| did not
                    occur.
 
-Alle messages of a treemap generation run are savesd in the global variable
+All messages of a treemap generation run are savesd in the global variable
 g:tmMess. You can create a log file. To do that read:
 |treemap-configure-other|
 |treemap-menu| - Plugin->Treemap->Log g:tmMess
@@ -674,6 +802,54 @@ Command: TmRun
 Start the treemap generation and call the function
 treemap#main(output,separator)
 with the variables g:tmOutput and g:tmSeparator
+
+The input window needs a headline!
+The output is written in a new tab.
+
+-----------------------------------------------------------------------------
+								*TmCreate*
+Command: TmCreate
+Start the treemap generation and call the function
+treemap#create(separator)
+with the variable g:tmSeparator
+
+Before starting this command mark an area in visual or visual-block mode.
+The content of the marked area is the input data for the generation.
+see |visual-mode|
+see |visual-block|
+(Don't select a headline!!)
+
+This function only calculates the rectangles and the result is saved in
+the tmClipboard (g:tmClipboard).
+The rectangles are not drawn anywhere.
+
+     +-------------------------------------------------------------+
+     |Note:                                                        |
+     |You start the visual mode with: 'v'                          |
+     |You start the visual block mode with:                        |
+     |<Ctrl-V> Linux                                               |
+     |<Ctrl-Q> Windows                                             |
+     |Then use the keys "h, j, k, l" to mark the area you want to  |
+     |select. (Keys: h - <LEFT>, j - <DOWN>, k - <UP>, l - <RIGHT>)|
+     +-------------------------------------------------------------+
+
+     +--------------------------------------------------------+
+     |Note:                                                   |
+     |If you use the visual-mode, don't use the command       |
+     |":TmCreate". You overwrite your data with that.         |
+     |Use instead the menu entry "Create" or <leader>tc.      |
+     |(visual-block mode is no problem)                       |
+     +--------------------------------------------------------+
+
+-----------------------------------------------------------------------------
+								*TmPrint*
+Command: TmPrint
+Start a treemap printing and call the function
+treemap#print(output)
+with the variable g:tmOutput
+
+The rectangles that are saved in the tmClipboard are drawn at the
+current position of your cursor.
 
 -----------------------------------------------------------------------------
 								*TmLog*
@@ -737,9 +913,11 @@ In case of output type "SVG":
 
 For the following menu entries / VIM Commands there exists a Mapping:
 
-|  Key         |  Command     |
+|    Key       |   Command    |
 *******************************
 |  <leader>tr  |  |TmRun|       |
+|  <leader>tc  |  |TmCreate|    |
+|  <leader>tp  |  |TmPrint|     |
 |  <leader>tl  |  |TmLog|       |
 
 The <leader> is the sign of the variable mapleader. If this variable is
