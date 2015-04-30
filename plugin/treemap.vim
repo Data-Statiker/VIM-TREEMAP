@@ -1,13 +1,13 @@
 "  vim:tabstop=2:shiftwidth=2:expandtab:foldmethod=marker:textwidth=79
 "  treemap.vim: (plugin) Creates a treemap in a new tab
-"  Last Change: Tue Apr 28 7:45 PM 2015 MET
+"  Last Change: Thu Apr 30 7:45 PM 2015 MET
 "  Author:	    Data-Statiker
 "  Maintainer:  Data-Statiker
 "  Version:     0.9.2, for Vim 7.4+
 
 "  New: {{{1
 "  Version 0.9.2:
-"  *	New Commands TmCreate and TmPrint
+"  *	New Commands TmCreate and TmDraw
 "     To seperate the calculating and drawing of treemap
 "  *  Create folders in plugin files for a clear view
 "
@@ -105,6 +105,7 @@
 
 	" number of layers
 	:let g:tmLNr = 0
+  :let g:tmLayNrs = []
 
 	" actual tabpage
 	" :let g:tmTabMain = tabpagenr()
@@ -121,6 +122,14 @@
 	:if !exists("g:tmTitle")
 		:let g:tmTitle = "Treemap"
 	:endif
+
+  " Clipboard variables
+	:if !exists("g:tmClipboard")
+		:let g:tmClipboard = []
+	:endif
+	:if !exists("g:tmClipSize")
+    :let g:tmClipSize = {}
+  :endif
 
 	" list for warnings and errors
 	:let g:tmMess = []
@@ -140,6 +149,8 @@
 	:let g:tmE0005["EN"] = "|E|E0005|Every unit must have only one parent"
  	:let g:tmE0006 = {"T":"E","O":"A","DE":"|E|E0006|Für diese Funktion (TmCreate) muss ein Bereich markiert sein"}
  	:let g:tmE0006["EN"] = "|E|E0006|This function need a marked area"
+  :let g:tmE0007 = {"T":"E","O":"A","DE":"|E|E0007|Es sind keine Daten im Zwischenspeicher zum zeichnen vorhanden"}
+ 	:let g:tmE0007["EN"] = "|E|E0007|There are no data to draw in the clipboard"
 	" Warnings
 	:let g:tmW0001 = {"T":"W","O":"A","DE":"|W|W0001|Das Rechteck wird nicht gezeichnet, da Fläche zu gering"}
 	:let g:tmW0001["EN"] = "|W|W0001|The rectangle is not drawn because the area is too small"
@@ -825,7 +836,6 @@
 
 :endf
 
-:let g:tmLayNrs = []
 " determine the layer number of a special entry
 :function! treemap#getLayerNrDesc(desc,hierachy)
 
@@ -843,7 +853,7 @@
 :endf
 
 " Print all messages from g:tmMess
-function! treemap#printAllMessages(messages,lang)
+:function! treemap#printAllMessages(messages,lang)
 	
 	:if a:lang == 'DE' || a:lang == 'EN'
 		:tabnew
@@ -859,6 +869,24 @@ function! treemap#printAllMessages(messages,lang)
 
 :endf
 
+" open the treemap in a browser and save it if not done before
+":function! treemap#openSVG()
+
+"  :let tmFileName = expand(@%)
+"  :if tmFileName == ""
+"    :if exists("*mkdir")
+"      :call mkdir($HOME . "\treemaps", "p","")
+"    :endif
+"    :execute 'normal w '.$home.'treemaps\treemap.htm'
+"    :let tmFileName = expand(@%)
+"  :endif
+
+"  :let tmFileName = substitute(tmFileName,"\\","\/","g")
+
+"  :execute 'silent ! start "Title" /b file:///'.tmFileName
+
+":endf
+
 " Print Treemap {{{1
 " Draw Frame
 :function! treemap#drawFrame(column,line)
@@ -871,7 +899,7 @@ function! treemap#printAllMessages(messages,lang)
 		:call setpos(".",[0,a:line,1,0])
 
 		:let a = 0
-		:for a in range (0,g:tmY+1+a:line)
+		:for a in range (0,g:tmY+1)
 			:execute "normal i\<ENTER>\<ESC>"
 			:execute "normal k"	
 			:let i = 0
@@ -897,9 +925,7 @@ function! treemap#printAllMessages(messages,lang)
 	:endif
 
 	:call treemap#fillMessage(notes)
-
 	:call treemap#printMessage(notes)
-	
 	:call treemap#interruptRun(err)
 
 	:unlet err
@@ -1133,11 +1159,28 @@ function! treemap#printAllMessages(messages,lang)
 
 :endf
 
-:function! treemap#print(output)
-  
+" draw the treemap at the position of your cursor
+:function! treemap#draw(output)
+
+  :let notes = []
+  :let err = 0
+
+  :call treemap#initialize()
+
+  :if empty(g:tmClipboard) || empty(g:tmClipSize)
+    :call add(notes,[g:tmE0007,""])
+    :let err = 1
+    :call treemap#fillMessage(notes)
+	  :call treemap#printMessage(notes)
+  	:call treemap#interruptRun(err)
+  :endif
+
+  :let s:tmRecs = []
+
   " read width and height from g:tmClipSize
   :let g:tmX = g:tmClipSize.x
   :let g:tmY = g:tmClipSize.y
+  :let s:tmRecs = deepcopy(g:tmClipboard)
 
   " Output = VIM / print rectangles (text)
 	:if a:output == 'VIM'
@@ -1147,9 +1190,9 @@ function! treemap#printAllMessages(messages,lang)
     :let s:col = s:tmPos[2]
 
 		:call treemap#drawFrame(s:col,s:lnum)
-		:for item in g:tmClipboard
-      :let item.x = item.x + s:col
-      :let item.y = item.y + s:lnum
+		:for item in s:tmRecs
+      :let item.x = item.x + s:col-1
+      :let item.y = item.y + s:lnum-1
 			:call treemap#drawRectangle(item)
 		:endfor
 

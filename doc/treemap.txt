@@ -1,5 +1,5 @@
 " vim: filetype=help foldmethod=marker foldmarker=<<<,>>> nomodifiable readonly
-*treemap.txt*	For Vim version 7.4.  Last change: 2015 Apr 28
+*treemap.txt*	For Vim version 7.4.  Last change: 2015 Apr 30
 
 
                 	  VIM REFERENCE MANUAL 
@@ -60,6 +60,14 @@ To start the treemap creation:
   for example: - call treemap#main('VIM','\t')
                - call treemap#main(g:tmOutput,g:tmSeparator)
 
+   +-----------------------------------------------------------+ 
+   | Note:                                                     |
+   | Set tho option wrap to 'nowrap'                           |
+   |   :set nowrap!                                            |
+   | Otherwise the treemap is displayed wrong. You can set this|
+   | option also after drawing the treemap!                    |
+   +-----------------------------------------------------------+
+
   +--------------------------------------------------------------+
   | Note:                                                        |
   | The decimal separator for the input file is in every language|
@@ -68,13 +76,13 @@ To start the treemap creation:
   |                1020.23                                       |
   +--------------------------------------------------------------+
 
-Use commands |TmCreate| and |TmPrint| instead of |TmRun|.
+Use commands |TmCreate| and |TmDraw| instead of |TmRun|.
 
 ==============================================================================
 2.  Whats New						*treemap-new*
 
 Version 0.9.2:
-*	New Commands TmCreate and TmPrint
+*	New Commands TmCreate and TmDraw
 	To seperate the calculating and drawing of treemap
 *	Create folders in plugin files for a clear view
 
@@ -179,15 +187,15 @@ To create a treemap do the following:
    and "-".
 
 4b Instead of using 4a you can also use the commands
-   |TmCreate| and |TmPrint|.
+   |TmCreate| and |TmDraw|.
    Menu:     Plugin->Treemap->Create create()
-             Plugin->Treemap->Print print()
+             Plugin->Treemap->Draw draw()
    Commands: TmCreate
-             TmPrint
+             TmDraw
    Mappings: <leader>tc
-             <leader>tp
+             <leader>td
    TmCreate creates the rectangles and save this to the tmClipboard.
-   TmPrint draw the rectangles to the current position of your cursor. 
+   TmDraw draw the rectangles to the current position of your cursor. 
 
        +--------------------------------------------------------+
        |Note:                                                   |
@@ -274,15 +282,6 @@ Install the vimball file with VIM
 
 Now you have the menu Plugin->Treemap
 
-HELP FILE:
-***********
-To activate the helpfile in VIM type in command mode:
- :helptags ~/.vim/doc
- OR (Windows)
- :helptags C:\Users\YourUsername\vimfiles\doc
-
-Then you can open the helpfile with ':help treemap'
-
 GITHUB:
 *********
 GITHUB Repository:
@@ -293,6 +292,13 @@ Copy the folders 'autoload', 'doc' and 'plugin' to your local vimfiles:
  ~/.vim/doc
  OR (Windows)
  C:\Users\YourUsername\vimfiles\doc
+
+HELP FILE:
+***********
+To activate the helpfile in VIM type in command mode:
+ :helptags ~/.vim/doc
+ OR (Windows)
+ :helptags C:\Users\YourUsername\vimfiles\doc
 
 ==============================================================================
 5. Configuration				*treemap-configure*
@@ -383,7 +389,7 @@ Copy the folders 'autoload', 'doc' and 'plugin' to your local vimfiles:
                 You can set the variable directly:
                    :let g:tmTitle = "My Treemap"
 -----------------------------------------------------------------------------
-    5.6 Logs                                 *treemap-configure-logs*
+    5.6 Logs                                       *treemap-configure-logs*
 	global variable: g:tmVerbose
 		if "g:tmVerbose == 0" only error messages are displayed
 		if "g:tmVerbose == 1" all messages are displayed (includes warnings
@@ -393,25 +399,26 @@ Copy the folders 'autoload', 'doc' and 'plugin' to your local vimfiles:
 
 	global variable: g:tmMess
 		All messages (errors, warnings, informations) of a treemap
-		generation are saved in the this list
+		generation are saved in the this list.
 
-		You can run the function treemap#printAllMessages(messages,lang)
+		You can run the function treemap#drawAllMessages(messages,lang)
 		to print all messages in a new tab. The new tab is generated
-		throgh the function.
+		through the function.
+                Same as |TmLog|.
 
 		parameter:
 		mess: list of messages (g:tmMess)
 		lang: language
 		
 		example:
-		:call treemap#printAllMessages(g:tmMess,"EN")
+		:call treemap#drawAllMessages(g:tmMess,"EN")
 -----------------------------------------------------------------------------
     5.7 Clipboard                               *treemap-configure-clipboard*
 	global variable: g:tmClipboard
                In case of execute the command TmCreate the calculated
                rectangles are saved in this variable.
                The saved rectangles are necessary for using the command
-               TmPrint. This command draw the rectangles of the tmClipboard
+               TmDraw. This command draw the rectangles of the tmClipboard
                at the position of your cursor
                Don't change this variable.
         global variable: g:tmClipSize
@@ -420,7 +427,7 @@ Copy the folders 'autoload', 'doc' and 'plugin' to your local vimfiles:
                width and height of the generated treemap is saved in this
                dictionary variable {'x':'width','y':'height'}.
                This informations are needed for printing the treemap later
-               with |TmPrint|.
+               with |TmDraw|.
                Don't change this variable.
 -----------------------------------------------------------------------------
     5.8 Other                                 *treemap-configure-other*
@@ -475,9 +482,9 @@ The rectangles are not drawn anywhere.
 
 -----------------------------------------------------------------------------
 
-Plugin->Treemap->Print print()
+Plugin->Treemap->Draw draw()
 Start a treemap printing and call the function
-treemap#print(output)
+treemap#draw(output)
 with the variable g:tmOutput
 
 The rectangles that are saved in the tmClipboard are drawn at the
@@ -658,8 +665,8 @@ Errors:
 	      Def: There was an error. Because of this error the
 	           program has to be stopped.
                    Check the global variable g:tmMess. See also
-                                                     |treemap-configure-other|
-						     |treemap-menu|
+                                                     |treemap-configure-logs|
+                                                     |treemap-menu|
 
 								*E0003*
 	E0003 DE "Der letzte Eintrag ist kein numerischer Wert"
@@ -730,6 +737,16 @@ Errors:
                    see |visual-mode|
                    see |visual-block|
 
+								*E0007*
+	E0007 DE "Es sind keine Daten im Zwischenspeicher zum zeichnen vorhanden"
+              EN "There are no data to draw in the clipboard"
+	      
+              Def: There are no data to draw in the clipboard
+                   (g:tmClipboard).
+                   Please start first TmCreate to fill the clipboard
+                   with data.
+                   See |TmCreate| and |TmDraw|.
+
 Warnings:
 								*W0001*
 	W0001 DE "Das Rechteck wird nicht gezeichnet, da Fläche zu gering"
@@ -738,7 +755,7 @@ Warnings:
 	      Def: Is the value of an unit is too small, so that the size of
                    the relevant rectangle is smaller than 3*3 (hight*width)
 	           the rectangle is not drawn.
-	           This has no influence to the other rectangles
+	           This has no influence to the other rectangles.
 
 Informations:
 								*I0001*
@@ -842,10 +859,10 @@ The rectangles are not drawn anywhere.
      +--------------------------------------------------------+
 
 -----------------------------------------------------------------------------
-								*TmPrint*
-Command: TmPrint
-Start a treemap printing and call the function
-treemap#print(output)
+								*TmDraw*
+Command: TmDraw
+Start a treemap drawing and call the function
+treemap#draw(output)
 with the variable g:tmOutput
 
 The rectangles that are saved in the tmClipboard are drawn at the
@@ -856,7 +873,7 @@ current position of your cursor.
 Command: TmLog
 Create a log file.
 Print the messages of the variable g:tmMess in a new tab.
-It calls the function treemap#printAllMessages(g:tmMess,$lang)
+It calls the function treemap#drawAllMessages(g:tmMess,$lang)
 
 -----------------------------------------------------------------------------
 								*TmColor*
@@ -917,7 +934,7 @@ For the following menu entries / VIM Commands there exists a Mapping:
 *******************************
 |  <leader>tr  |  |TmRun|       |
 |  <leader>tc  |  |TmCreate|    |
-|  <leader>tp  |  |TmPrint|     |
+|  <leader>td  |  |TmDraw|     |
 |  <leader>tl  |  |TmLog|       |
 
 The <leader> is the sign of the variable mapleader. If this variable is
