@@ -1,5 +1,5 @@
 " vim: filetype=help foldmethod=marker foldmarker=<<<,>>> nomodifiable readonly
-*treemap.txt*	For Vim version 7.4.  Last change: 2015 Apr 30
+*treemap.txt*	For Vim version 7.4.  Last change: 2015 May 01
 
 
                 	  VIM REFERENCE MANUAL 
@@ -7,7 +7,7 @@
                            Data Statiker
 
 	  	Treemap extension plugin (treemap.vim) manual
-	  	treemap.vim version 0.9.2
+	  	treemap.vim version 0.9.21
 
 For instructions on installing this file, type
 	:help add-local-help
@@ -80,6 +80,9 @@ Use commands |TmCreate| and |TmDraw| instead of |TmRun|.
 
 ==============================================================================
 2.  Whats New						*treemap-new*
+
+Version 0.9.21:
+*       Bugfix TmCreate with other separators than "\t" (tab)
 
 Version 0.9.2:
 *	New Commands TmCreate and TmDraw

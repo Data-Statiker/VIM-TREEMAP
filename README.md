@@ -6,7 +6,7 @@ VIM-TREEMAP is a vim script to create a treemap from a character seperated input
 For further details read the vim help file:
 ../doc/treemap.txt
 
-Version 0.9.2
+Version 0.9.21
 
 ### Getting Started
 
@@ -45,6 +45,9 @@ Use commands TmCreate and TmDraw instead of TmRun.
 
 
 ### Whats New
+
+Version 0.9.21:
+- Bugfix TmCreate with other separators than "\t" (tab)
 
 Version 0.9.2:
 - New Commands TmCreate and TmDraw
