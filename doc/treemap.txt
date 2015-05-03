@@ -7,7 +7,7 @@
                            Data Statiker
 
 	  	Treemap extension plugin (treemap.vim) manual
-	  	treemap.vim version 0.9.21
+	  	treemap.vim version 0.9.2.1
 
 For instructions on installing this file, type
 	:help add-local-help
@@ -81,7 +81,7 @@ Use commands |TmCreate| and |TmDraw| instead of |TmRun|.
 ==============================================================================
 2.  Whats New						*treemap-new*
 
-Version 0.9.21:
+Version 0.9.2.1:
 *       Bugfix TmCreate with other separators than "\t" (tab)
 
 Version 0.9.2:

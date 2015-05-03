@@ -6,7 +6,7 @@ VIM-TREEMAP is a vim script to create a treemap from a character seperated input
 For further details read the vim help file:
 ../doc/treemap.txt
 
-Version 0.9.21
+Version 0.9.2.1
 
 ### Getting Started
 

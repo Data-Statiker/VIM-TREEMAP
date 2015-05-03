@@ -56,7 +56,7 @@
       \ call add(g:tmColor,input("Choose second Color: ","grey")) |
       \ call add(g:tmColor,input("Choose first Color: ","red"))
 :command! -count=1 TmSeparator
-      \ let g:tmSeparator =  input("Separator: ","\t")
+      \ let g:tmSeparator =  input("Separator: ","\\t")
 :command! -count=1 TmOutput
       \ let g:tmOutput =  input("Output Type: ","VIM")
 :command! -count=1 TmWidth
