@@ -8,8 +8,11 @@
 :menu Plugin.&Treemap.&Create<tab>create()  :call treemap#create(g:tmSeparator)<CR>
 :menu Plugin.&Treemap.&Draw<tab>draw()  :call treemap#draw(g:tmOutput)<CR>
 
+" Open a SCG/HTML treemap in the browser
+:menu Plugin.&Treemap.&Open<tab>SVG  :call treemap#tmOpenSVG()<CR>
+
 " Print log variable g:tmMess
-:menu Plugin.&Treemap.&Log<tab>g:tmMess  :call treemap#printAllMessages(g:tmMess,$lang)<CR>
+:menu Plugin.&Treemap.&Log<tab>g:tmMess  :call treemap#printAllMessages(g:tmMess,$LANG)<CR>
 
 " Title
 :menu Plugin.&Treemap.&Title<tab>g:tmTitle  :let g:tmTitle = inputdialog("Title:","Treemap","Treemap")<CR>
@@ -46,8 +49,10 @@
       \ call treemap#create(g:tmSeparator)
 :command! -count=1 TmDraw
       \ call treemap#draw(g:tmOutput)
+:command! -count=1 TmOpen
+      \ call treemap#tmOpenSVG()
 :command! -count=1 TmLog
-      \ call treemap#printAllMessages(g:tmMess,$lang)
+      \ call treemap#printAllMessages(g:tmMess,$LANG)
 :command! -count=1 TmTitle
       \ let g:tmTitle =  input("Title: ","Treemap")
 :command! -count=1 TmColor
@@ -68,4 +73,5 @@
 :map <Leader>tr  :TmRun<Esc>
 :map <Leader>tc  :TmCreate<Esc>
 :map <Leader>td  :TmDraw<Esc>
+:map <Leader>to  :TmOpen<Esc>
 :map <Leader>tl  :TmLog<Esc>

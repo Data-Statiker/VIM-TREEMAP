@@ -175,40 +175,6 @@ In case of output type "SVG":
                    1020.23                                        
 
 
-Other paramters:
-
-You can change the size of the treemap with the following variables:
-- g:tmUx - width                               // example: :let g:tmUx = 230
-- g:tmUy - height                              // example: :let g:tmUy = 65
-To do that you can use the menu "Plugin"->"Treemap"->"Size".
-
-If this parameters aren't set, the default values are taken:
-VIM:  230 * 65
-SVG: 1024 * 768
-
-
-The title of a treemap can defined in the menu:
-   Plugin-Treemap-Title g:tmTitle (|treemap-menu|)
-
-After executing this menu point youn can insert the name of your Treemap in a
-input pop up.
-
-You can also set the variable g:tmTitle directly:
-   :let g:tmTitle = "MyTreemapName"
-
-In case of output type "VIM":
-   The title is written in line 1 of the output tab
-In case of output type "SVG":
-   - The title is used in the HTML Header as 'title'
-   - The title is used as a headline for the SVG graphic
-
-     Warning:                                                     
-     The decimal separator for the input file is in every language
-     the point "."                                                
-         examples:   23.1                                         
-                   1020.23                                        
-
-
 ### Installation
 
 VIMBALL:
