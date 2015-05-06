@@ -1,6 +1,6 @@
 "  vim:tabstop=2:shiftwidth=2:expandtab:foldmethod=marker:textwidth=79
 "  treemap.vim: (plugin) Creates a treemap in a new tab
-"  Last Change: Mon May 04 7:45 PM 2015 MET
+"  Last Change: Wed May 06 7:45 PM 2015 MET
 "  Author:	    Data-Statiker
 "  Maintainer:  Data-Statiker
 "  Version:     0.9.3, for Vim 7.4+
@@ -1063,21 +1063,37 @@
 :function! treemap#tmOpenSVG()
   
   :if @% == ""
-    
+  
+    :let tmDirName = $HOME."\\treemaps"
+
     :if isdirectory($HOME."\\treemaps") == 0
       :let tmCreateDir = input("Create folder ".$HOME."treemaps [y/n]:")
       :if tmCreateDir == "y" || tmCreateDir == "Y"
-        :let tmDirName = $HOME."\\treemaps"
         :call mkdir(tmDirName,"p")
+        :let tmFileNr = 1
       :endif
+    :else
+       :let tmFiles = split(globpath(tmDirName,"*.htm"),"\n")
+       :if !empty(tmFiles)
+         :let tmPos1 = match(tmFiles[len(tmFiles)-1],"treemap_") + 7
+         :let tmPos2 = match(tmFiles[len(tmFiles)-1],".htm") - tmPos1 - 1
+         :let tmFileNr = strpart(tmFiles[len(tmFiles)-1],tmPos1+1,tmPos2) + 1
+       :else
+         :let tmFileNr = 1
+       :endif
+"      :let tmDeleteFile = $HOME."\\treemaps\\treemap.htm"
+"      :let tmDeleteFile = substitute(tmDeleteFile,":\\\\\\",":/","g")
+"      :let tmDeleteFile = substitute(tmDeleteFile,"\\","\/","g")
+"      :let tmIsDeleted = delete(tmDeleteFile)
     :endif
-    :let tmFileName = $HOME."\\treemaps\\treemap.htm"
+    :let tmFileName = $HOME.'\treemaps\treemap_'.tmFileNr.'.htm'
     :execute "w! ".tmFileName
   :else
     :let tmFileName = expand(@%)
   :endif
- 
-  :let tmOpenFile = substitute(tmFileName,"\\","\/","g")
+
+  :let tmTempOpenFile = substitute(tmFileName,":\\\\\\",":/","g")
+  :let tmOpenFile = substitute(tmTempOpenFile,"\\","\/","g")
   :execute 'silent ! start "Title" /b "file:///'.tmOpenFile.'"'
 :endf
 
