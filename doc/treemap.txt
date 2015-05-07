@@ -1,5 +1,5 @@
 " vim: filetype=help foldmethod=marker foldmarker=<<<,>>> nomodifiable readonly
-*treemap.txt*	For Vim version 7.4.  Last change: 2015 May 05
+*treemap.txt*	For Vim version 7.4.  Last change: 2015 May 07
 
 
                 	  VIM REFERENCE MANUAL 
@@ -83,7 +83,9 @@ Use commands |TmCreate| and |TmDraw| instead of |TmRun|.
 
 Version 0.9.3:
 *       New command TmOpen (Mapping <leader>to)
-        This command opens a generated SVG/HTML treemap in a wb browser
+        This command opens a generated SVG/HTML treemap in a web browser
+*       Bugfix: Replace $lang with $LANG for compatibility with older VIM
+        versions
 
 Version 0.9.2.1:
 *       Bugfix TmCreate with other separators than "\t" (tab)
@@ -429,7 +431,8 @@ To activate the helpfile in VIM type in command mode:
                at the position of your cursor
                Don't change this variable.
         global variable: g:tmClipSize
-               Default value: {'x':70,'y':25}
+               Default value "VIM": {'x':70,'y':25}
+               Default value "SVG": {'x':1024,'y':768}
                Are the rectangles created with the command |TmCreate| the
                width and height of the generated treemap is saved in this
                dictionary variable {'x':'width','y':'height'}.
@@ -503,7 +506,7 @@ Plugin->Treemap->Open SVG
 Open the generated SVG/HTML treemap in your web browser.
 For that the file has to be saved. If it isn't saved yet, the treemap
 plugin will save it in the subdirectory 'treemaps" of your home
-directory ($HOME). The file name is 'treemap.htm'.
+directory ($HOME). The file name is 'treemap_<Nr>.htm'.
 If the subdirectory doesn't exist, you will be asked by the first
 saving if you agree that the plugin creates the folder.
 
@@ -884,6 +887,7 @@ with the variable g:tmOutput
 
 The rectangles that are saved in the tmClipboard are drawn at the
 current position of your cursor.
+
 -----------------------------------------------------------------------------
 								*TmOpen*
 Command: TmOpen

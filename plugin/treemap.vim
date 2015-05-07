@@ -1,14 +1,16 @@
 "  vim:tabstop=2:shiftwidth=2:expandtab:foldmethod=marker:textwidth=79
 "  treemap.vim: (plugin) Creates a treemap in a new tab
-"  Last Change: Wed May 06 7:45 PM 2015 MET
+"  Last Change: Thu May 07 7:45 PM 2015 MET
 "  Author:	    Data-Statiker
 "  Maintainer:  Data-Statiker
 "  Version:     0.9.3, for Vim 7.4+
 
 "  New: {{{1
 "  Version 0.9.3:
-"  *  New command TmOpen (Mapping <leader>to)
-"     This command opens a generated SVG/HTML treemap in a wb browser
+"  * New command TmOpen (Mapping <leader>to)
+"    This command opens a generated SVG/HTML treemap in a web browser
+"  * Bugfix: Replace $lang with $LANG for compatibility with older VIM
+"    versions
 "
 "  Version 0.9.2.1:
 "  *  Bugfix TmCreate with other separators than "\t" (tab)
@@ -219,8 +221,6 @@
     :let buffer = getline(1,line("$"))
   :endif
   
-  :let g:tmBuffer = deepcopy(buffer)
-
   :let screen = []
 	:let i = 0
 	:for i in range(0,len(buffer)-1)
@@ -1064,20 +1064,31 @@
   
   :if @% == ""
   
-    :let tmDirName = $HOME."\\treemaps"
+    :let tmDirName = $HOME.'\treemaps'
 
     :if isdirectory($HOME."\\treemaps") == 0
-      :let tmCreateDir = input("Create folder ".$HOME."treemaps [y/n]:")
+      :let tmCreateDir = input('Create folder '.$HOME.'\treemaps [y/n]:')
       :if tmCreateDir == "y" || tmCreateDir == "Y"
         :call mkdir(tmDirName,"p")
         :let tmFileNr = 1
       :endif
     :else
-       :let tmFiles = split(globpath(tmDirName,"*.htm"),"\n")
+       :let tmFiles = split(globpath(tmDirName,'*.htm'),'\n')
+       :let i = 0
        :if !empty(tmFiles)
-         :let tmPos1 = match(tmFiles[len(tmFiles)-1],"treemap_") + 7
-         :let tmPos2 = match(tmFiles[len(tmFiles)-1],".htm") - tmPos1 - 1
-         :let tmFileNr = strpart(tmFiles[len(tmFiles)-1],tmPos1+1,tmPos2) + 1
+         :for i in range(0,len(tmFiles)-1)
+           :let tmPos1 = match(tmFiles[i],"treemap_") + 7
+           :let tmPos2 = match(tmFiles[i],".htm") - tmPos1 - 1
+           :let tmTempFileNr = strpart(tmFiles[i],tmPos1+1,tmPos2) + 1
+           :if !exists('tmFileNr')
+             :let tmFileNr = tmTempFileNr
+           :else
+             :if tmTempFileNr > tmFileNr
+               :let tmFileNr = tmTempFileNr
+             :endif
+           :endif
+           :let i += 1
+         :endfor
        :else
          :let tmFileNr = 1
        :endif
@@ -1086,15 +1097,18 @@
 "      :let tmDeleteFile = substitute(tmDeleteFile,"\\","\/","g")
 "      :let tmIsDeleted = delete(tmDeleteFile)
     :endif
-    :let tmFileName = $HOME.'\treemaps\treemap_'.tmFileNr.'.htm'
-    :execute "w! ".tmFileName
+      :if isdirectory($HOME.'\treemaps') == 1
+        :let tmFileName = $HOME.'\treemaps\treemap_'.tmFileNr.'.htm'
+        :execute "w! ".tmFileName
+      :endif
   :else
     :let tmFileName = expand(@%)
   :endif
-
-  :let tmTempOpenFile = substitute(tmFileName,":\\\\\\",":/","g")
-  :let tmOpenFile = substitute(tmTempOpenFile,"\\","\/","g")
-  :execute 'silent ! start "Title" /b "file:///'.tmOpenFile.'"'
+  :if isdirectory($HOME.'\treemaps') == 1 && executable(tmFileName)
+      :let tmTempOpenFile = substitute(tmFileName,":\\\\\\",":/","g")
+      :let tmOpenFile = substitute(tmTempOpenFile,"\\","\/","g")
+      :execute 'silent ! start "Title" /b "file:///'.tmOpenFile.'"'
+  :endif
 :endf
 
 " Main Function {{{1
@@ -1160,14 +1174,28 @@
 :function! treemap#create(separator)
 	
   "set width and height
-  :if exists("g:tmUx") && exists("g:tmUy")
-		:let g:tmX = g:tmUx
-		:let g:tmY = g:tmUy
-	:else
-		:let g:tmX = 70
-		:let g:tmY = 25
+  :if g:tmOutput == 'VIM'
+		:if exists("g:tmUx") && exists("g:tmUy")
+			:let g:tmX = g:tmUx
+			:let g:tmY = g:tmUy
+		:else
+			:let g:tmX = 70
+			:let g:tmY = 25
+		:endif
+		:let g:tmPt = g:tmX * g:tmY
 	:endif
-	:let g:tmPt = g:tmX * g:tmY
+
+	" Output = SVG / set frame variables
+	:if g:tmOutput == 'SVG'
+		:if exists("g:tmUx") && exists("g:tmUy")
+			:let g:tmX = g:tmUx
+			:let g:tmY = g:tmUy
+		:else
+			:let g:tmX = 1024
+			:let g:tmY = 768
+		:endif
+		:let g:tmPt = g:tmX * g:tmY
+	:endif
 
   :call treemap#initialize()
 
