@@ -1,6 +1,6 @@
 "  vim:tabstop=2:shiftwidth=2:expandtab:foldmethod=marker:textwidth=79
 "  treemap.vim: (plugin) Creates a treemap in a new tab
-"  Last Change: Thu May 07 7:45 PM 2015 MET
+"  Last Change: Fri May 08 7:45 PM 2015 MET
 "  Author:	    Data-Statiker
 "  Maintainer:  Data-Statiker
 "  Version:     0.9.3, for Vim 7.4+
@@ -11,6 +11,8 @@
 "    This command opens a generated SVG/HTML treemap in a web browser
 "  * Bugfix: Replace $lang with $LANG for compatibility with older VIM
 "    versions
+"  * New command TmClear to delete all generated files from TmOpen in
+"    the /HOME/.../treemaps/ directory
 "
 "  Version 0.9.2.1:
 "  *  Bugfix TmCreate with other separators than "\t" (tab)
@@ -668,7 +670,7 @@
 		:call treemap#fillMessage(notes)
 		:call treemap#printMessage(notes)
 		:let g:tmErr = 1
-		:sleep 10
+		:sleep 5
 		:throw "oops"
 		":exit
 	:endif
@@ -1108,6 +1110,30 @@
       :let tmTempOpenFile = substitute(tmFileName,":\\\\\\",":/","g")
       :let tmOpenFile = substitute(tmTempOpenFile,"\\","\/","g")
       :execute 'silent ! start "Title" /b "file:///'.tmOpenFile.'"'
+  :endif
+:endf
+
+" Delelete all treemap files in the HOME-Treemaps directory
+:function! treemap#tmClearTreemapDir()
+  :let tmDirName = $HOME.'\treemaps'
+  :let tmDirName = substitute(tmDirName,'\\\\','\\','g')
+  :if isdirectory(tmDirName) == 1
+    :let tmFiles = split(globpath(tmDirName,'*.htm'),'\n')
+    :if !empty(tmFiles)
+      :let i = 0
+      :for item in tmFiles
+        :call delete(tmFiles[i])
+        :let i+= 1
+      :endfor
+    :endif
+    :let tmFiles = split(globpath(tmDirName,'*.htm~'),'\n')
+    :if !empty(tmFiles)
+      :let i = 0
+      :for item in tmFiles
+        :call delete(tmFiles[i])
+        :let i+= 1
+      :endfor
+    :endif
   :endif
 :endf
 
