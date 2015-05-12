@@ -1,18 +1,18 @@
 "  vim:tabstop=2:shiftwidth=2:expandtab:foldmethod=marker:textwidth=79
 "  treemap.vim: (plugin) Creates a treemap in a new tab
-"  Last Change: Fri May 08 7:45 PM 2015 MET
-"  Author:	    Data-Statiker
+"  Last Change: Tue May 12 10:45 PM 2015 MET
+"  Author:      Data-Statiker
 "  Maintainer:  Data-Statiker
-"  Version:     0.9.3, for Vim 7.4+
+"  Version:     1.0, for Vim 7.4+
 
 "  New: {{{1
-"  Version 0.9.3:
+"  Version 1.0:
 "  * New command TmOpen (Mapping <leader>to)
 "    This command opens a generated SVG/HTML treemap in a web browser
 "  * Bugfix: Replace $lang with $LANG for compatibility with older VIM
 "    versions
 "  * New command TmClear to delete all generated files from TmOpen in
-"    the /HOME/.../treemaps/ directory
+"    the $HOME/treemaps/ directory
 "
 "  Version 0.9.2.1:
 "  *  Bugfix TmCreate with other separators than "\t" (tab)
@@ -876,14 +876,25 @@
 		:tabnew
 		:let i = 0
 		:for item in a:messages
-			:let i+= 1
+			:let i += 1
 			:call setline(i,item[0][tmLang].' / '.item[1])
 		:endfor
 		:unlet i
 	:else
-		:echo 'Die Sprache '.tmLang.' ist nicht gepflegt!'
+    :tabnew
+    :let i = 0
+		:for item in a:messages
+			:let i += 1
+			:call setline(i,item[0]['EN'].' / '.item[1])
+		:endfor
+		:unlet i
 	:endif
 
+:endf
+
+" Check if this VIM is insatlled on Windows or a LINUX System
+:function! treemap#tmIsWin()
+  :return has("win32") || has("win64") || has("win95") || has("win16")
 :endf
 
 " Print Treemap {{{1
@@ -1064,12 +1075,20 @@
 " Save and open SVG treemap in a web browser
 :function! treemap#tmOpenSVG()
   
+  :let tmIsWin = treemap#tmIsWin()
+
+  :if tmIsWin == 1
+    :let tmDirSep = '\'
+  :else
+    :let tmDirSep = '/'
+  :endif
+
   :if @% == ""
   
-    :let tmDirName = $HOME.'\treemaps'
+    :let tmDirName = $HOME.tmDirSep.'treemaps'
 
-    :if isdirectory($HOME."\\treemaps") == 0
-      :let tmCreateDir = input('Create folder '.$HOME.'\treemaps [y/n]:')
+    :if isdirectory($HOME.tmDirSep.'treemaps') == 0
+      :let tmCreateDir = input('Create folder '.$HOME.tmDirSep.'treemaps [y/n]:')
       :if tmCreateDir == "y" || tmCreateDir == "Y"
         :call mkdir(tmDirName,"p")
         :let tmFileNr = 1
@@ -1094,28 +1113,41 @@
        :else
          :let tmFileNr = 1
        :endif
-"      :let tmDeleteFile = $HOME."\\treemaps\\treemap.htm"
-"      :let tmDeleteFile = substitute(tmDeleteFile,":\\\\\\",":/","g")
-"      :let tmDeleteFile = substitute(tmDeleteFile,"\\","\/","g")
+"      :let tmDeleteFile = $HOME.tmDirSep.'treemaps'.tmDirSep.'treemap.htm'
+"      :let tmDeleteFile = substitute(tmDeleteFile,':\\',':/','g')
+"      :let tmDeleteFile = substitute(tmDeleteFile,'\','/','g')
 "      :let tmIsDeleted = delete(tmDeleteFile)
     :endif
-      :if isdirectory($HOME.'\treemaps') == 1
-        :let tmFileName = $HOME.'\treemaps\treemap_'.tmFileNr.'.htm'
+      :if isdirectory($HOME.tmDirSep.'treemaps') == 1
+        :let tmFileName = $HOME.tmDirSep.'treemaps'.tmDirSep.'treemap_'.tmFileNr.'.htm'
         :execute "w! ".tmFileName
       :endif
   :else
     :let tmFileName = expand(@%)
   :endif
-  :if isdirectory($HOME.'\treemaps') == 1 && executable(tmFileName)
-      :let tmTempOpenFile = substitute(tmFileName,":\\\\\\",":/","g")
-      :let tmOpenFile = substitute(tmTempOpenFile,"\\","\/","g")
-      :execute 'silent ! start "Title" /b "file:///'.tmOpenFile.'"'
+  :if isdirectory($HOME.tmDirSep.'treemaps') == 1 " && executable(tmFileName)
+      :let tmTempOpenFile = substitute(tmFileName,':\\',':/','g')
+      :let tmOpenFile = substitute(tmTempOpenFile,'\\','/','g')
+      :if treemap#tmIsWin()
+        :execute 'silent ! start "Title" /b "file:///'.tmOpenFile.'"'
+      :else
+        :call system('xdg-open ' . shellescape(tmOpenFile, 1).' &')
+      :endif
   :endif
 :endf
 
 " Delelete all treemap files in the HOME-Treemaps directory
 :function! treemap#tmClearTreemapDir()
-  :let tmDirName = $HOME.'\treemaps'
+  
+  :let tmIsWin = treemap#tmIsWin()
+
+  :if tmIsWin == 1
+    :let tmDirSep = '\'
+  :else
+    :let tmDirSep = '/'
+  :endif
+  
+  :let tmDirName = $HOME.tmDirSep.'treemaps'
   :let tmDirName = substitute(tmDirName,'\\\\','\\','g')
   :if isdirectory(tmDirName) == 1
     :let tmFiles = split(globpath(tmDirName,'*.htm'),'\n')

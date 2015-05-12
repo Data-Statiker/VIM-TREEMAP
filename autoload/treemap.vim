@@ -66,7 +66,7 @@
 :command! -count=1 TmSeparator
       \ let g:tmSeparator =  input("Separator: ","\\t")
 :command! -count=1 TmOutput
-      \ let g:tmOutput =  input("Output Type: ","VIM")
+      \ let g:tmOutput =  input("Output Type [VIM/SVG]: ","VIM")
 :command! -count=1 TmWidth
       \ let g:tmUx=  input("Width: ","70")
 :command! -count=1 TmHeight
