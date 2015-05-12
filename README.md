@@ -6,12 +6,19 @@ VIM-TREEMAP is a vim script to create a treemap from a character seperated input
 For further details read the vim help file:
 ../doc/treemap.txt
 
-Version 0.9.2.1
+Version 1.0
 
 ### Getting Started
 
 With the treemap extension plugin for vim you can create treemaps with the
 output in a textfile or an imbedded SVG HTML file.
+
+See screenshots at GITHUB:
+- Input File:             https://github.com/Data-Statiker/VIM-TREEMAP/blob/master/screenshots/inputFile.png
+- Treemap Output VIM:     https://github.com/Data-Statiker/VIM-TREEMAP/blob/master/screenshots/treemapOutputVIM.png
+- Treemap Output SVG:     https://github.com/Data-Statiker/VIM-TREEMAP/blob/master/screenshots/trremapOutputSVG.png
+- Treemap SVG in Browser: https://github.com/Data-Statiker/VIM-TREEMAP/blob/master/screenshots/treemapOpenSVG.png
+
 
 First install the plugin: |treemap-install|
 
@@ -46,7 +53,16 @@ Use commands TmCreate and TmDraw instead of TmRun.
 
 ### Whats New
 
-Version 0.9.21:
+Version 1.0:
+- New command TmOpen (Mapping <leader>to)
+  This command opens a generated SVG/HTML treemap in a 
+  web browser
+- Bugfix: Replace $lang with $LANG for compatibility with
+  older VIM versions
+- New command TmClear to delete all generated files from TmOpen
+  in the $HOME/treemaps/ directory
+
+Version 0.9.2.1:
 - Bugfix TmCreate with other separators than "\t" (tab)
 
 Version 0.9.2:
