@@ -1,11 +1,14 @@
 "  vim:tabstop=2:shiftwidth=2:expandtab:foldmethod=marker:textwidth=79
 "  treemap.vim: (plugin) Creates a treemap in a new tab
-"  Last Change: Tue May 12 10:45 PM 2015 MET
+"  Last Change: Tue May 19 10:45 PM 2015 MET
 "  Author:      Data-Statiker
 "  Maintainer:  Data-Statiker
-"  Version:     1.0, for Vim 7.4+
+"  Version:     1.1, for Vim 7.4+
 
 "  New: {{{1
+"  Version 1.1:
+"  * Bugfix: TmOpen if ~/ is only a drive letter (e.g. L:\)
+"
 "  Version 1.0:
 "  * New command TmOpen (Mapping <leader>to)
 "    This command opens a generated SVG/HTML treemap in a web browser
@@ -1126,8 +1129,8 @@
     :let tmFileName = expand(@%)
   :endif
   :if isdirectory($HOME.tmDirSep.'treemaps') == 1 " && executable(tmFileName)
-      :let tmTempOpenFile = substitute(tmFileName,':\\',':/','g')
-      :let tmOpenFile = substitute(tmTempOpenFile,'\\','/','g')
+      :let tmTempOpenFile = substitute(tmFileName,':\\\\',':/','g')
+      :let tmOpenFile = substitute(tmTempOpenFile,'\','/','g')
       :if treemap#tmIsWin()
         :execute 'silent ! start "Title" /b "file:///'.tmOpenFile.'"'
       :else
