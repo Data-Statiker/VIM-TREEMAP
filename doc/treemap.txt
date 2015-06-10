@@ -1,5 +1,5 @@
 " vim: filetype=help foldmethod=marker foldmarker=<<<,>>> nomodifiable readonly
-*treemap.txt*	For Vim version 7.4.  Last change: 2015 May 19
+*treemap.txt*	For Vim version 7.4.  Last change: 2015 Jun 10
 
           ___________                                            
           \__    ___/______   ____   ____   _____ _____  ______  
@@ -97,6 +97,7 @@ Use commands |TmCreate| and |TmDraw| instead of |TmRun|.
 
 Version 1.1:
 *	Bugfix: TmOpen if ~/ is only a drive letter (e.g. L:\)
+*	Bugfix: HTML/SVG generation without encoding and language
 
 Version 1.0:
 *       New command TmOpen (Mapping <leader>to)

@@ -1,6 +1,6 @@
 "  vim:tabstop=2:shiftwidth=2:expandtab:foldmethod=marker:textwidth=79
 "  treemap.vim: (plugin) Creates a treemap in a new tab
-"  Last Change: Tue May 19 10:45 PM 2015 MET
+"  Last Change: Wed Jun 10 10:02 PM 2015 MET
 "  Author:      Data-Statiker
 "  Maintainer:  Data-Statiker
 "  Version:     1.1, for Vim 7.4+
@@ -8,6 +8,7 @@
 "  New: {{{1
 "  Version 1.1:
 "  * Bugfix: TmOpen if ~/ is only a drive letter (e.g. L:\)
+"  * Bugfix: HTML/SVG generation without encoding and language
 "
 "  Version 1.0:
 "  * New command TmOpen (Mapping <leader>to)
@@ -1035,8 +1036,11 @@
 :function! treemap#drawRectanglesSVG(rectangles)
 
 	" HTML part 1	
-	:call setline(1,'<?xml version="1.0" encoding="ISO-8859-1"?>')
-	:call setline(2,'<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="de">')
+	":call setline(1,'<?xml version="1.0" encoding="ISO-8859-1"?>')
+  ":call setline(1,'<?xml version="1.0" encoding="UTF-8"?>')
+	":call setline(2,'<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="'.tolower(strpart($LANG,0,2)).'">')
+  :call setline(1,'<!DOCTYPE html>')
+  :call setline(2,'<html>')
 	:call setline(3,'<head>')
 	:call setline(4,'<title>'.g:tmTitle.'</title>')
 	:call setline(5,'</head>')
